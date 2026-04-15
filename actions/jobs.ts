@@ -1,0 +1,94 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/db";
+import { requireUser } from "@/lib/auth";
+import { jobSchema, jobStatusSchema } from "@/lib/validators";
+import { onJobStatusChange } from "@/lib/automation";
+import type { JobStatus } from "@prisma/client";
+
+type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
+
+export async function createJob(formData: FormData): Promise<ActionResult> {
+  const user = await requireUser();
+  const parsed = jobSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.errors[0]?.message ?? "Invalid input" };
+  }
+  const data = parsed.data;
+
+  // Ownership check on the contact.
+  const contact = await prisma.contact.findFirst({
+    where: { id: data.contactId, userId: user.id },
+    select: { id: true },
+  });
+  if (!contact) return { ok: false, error: "Contact not found" };
+
+  const initialStatus = data.status;
+
+  const job = await prisma.$transaction(async (tx) => {
+    const created = await tx.job.create({
+      data: {
+        userId: user.id,
+        contactId: data.contactId,
+        title: data.title,
+        description: data.description || null,
+        estimatedValue: data.estimatedValue ? data.estimatedValue : null,
+        currency: data.currency || "USD",
+        status: "NEW",
+      },
+    });
+    if (initialStatus && initialStatus !== "NEW") {
+      return onJobStatusChange(tx, created, initialStatus);
+    }
+    return created;
+  });
+
+  revalidatePath("/jobs");
+  revalidatePath("/followups");
+  revalidatePath("/dashboard");
+  revalidatePath(`/contacts/${data.contactId}`);
+  return { ok: true, id: job.id };
+}
+
+export async function updateJobStatus(
+  formData: FormData
+): Promise<ActionResult> {
+  const user = await requireUser();
+  const parsed = jobStatusSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { ok: false, error: "Invalid input" };
+
+  const { jobId, status } = parsed.data;
+
+  const existing = await prisma.job.findFirst({
+    where: { id: jobId, userId: user.id },
+  });
+  if (!existing) return { ok: false, error: "Job not found" };
+  if (existing.status === status) return { ok: true, id: jobId };
+
+  await prisma.$transaction(async (tx) => {
+    await onJobStatusChange(tx, existing, status as JobStatus);
+  });
+
+  revalidatePath("/jobs");
+  revalidatePath("/followups");
+  revalidatePath("/dashboard");
+  revalidatePath(`/contacts/${existing.contactId}`);
+  return { ok: true, id: jobId };
+}
+
+export async function deleteJob(id: string): Promise<ActionResult> {
+  const user = await requireUser();
+  const existing = await prisma.job.findFirst({
+    where: { id, userId: user.id },
+    select: { id: true, contactId: true },
+  });
+  if (!existing) return { ok: false, error: "Job not found" };
+
+  await prisma.job.delete({ where: { id } });
+  revalidatePath("/jobs");
+  revalidatePath("/followups");
+  revalidatePath("/dashboard");
+  revalidatePath(`/contacts/${existing.contactId}`);
+  return { ok: true };
+}
