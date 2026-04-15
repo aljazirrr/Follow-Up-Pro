@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { contactSchema } from "@/lib/validators";
@@ -80,10 +79,4 @@ export async function deleteContact(id: string): Promise<ActionResult> {
   revalidatePath("/contacts");
   revalidatePath("/dashboard");
   return { ok: true };
-}
-
-export async function createContactAndRedirect(formData: FormData) {
-  const res = await createContact(formData);
-  if (!res.ok) return res;
-  redirect(`/contacts/${res.id}`);
 }
