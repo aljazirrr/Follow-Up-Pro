@@ -33,7 +33,7 @@ export function Sidebar() {
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
           <Zap className="h-4 w-4" />
         </div>
-        <div className="font-semibold tracking-tight">Follow Up Pro</div>
+        <div className="font-semibold tracking-tight">Rebooker</div>
       </div>
       <nav className="flex flex-col gap-0.5 p-3">
         {nav.map((item) => {
