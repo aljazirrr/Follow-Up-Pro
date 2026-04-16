@@ -5,7 +5,7 @@ import { DEFAULT_TEMPLATES } from "../emails/defaults";
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = "demo@followuppro.com";
+  const email = "demo@rebooker.io";
   const password = "demo1234";
   const hashedPassword = await bcrypt.hash(password, 10);
 

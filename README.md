@@ -1,8 +1,8 @@
-# Follow Up Pro
+# Rebooker
 
 Automated follow-ups for local service businesses.
 
-Follow Up Pro is a micro-SaaS that helps detailers, plumbers, electricians, cleaners, gardeners, salons, and repair shops stop losing leads to missed follow-ups. It's a **follow-up engine with a minimal CRM around it** — not a bloated generic CRM.
+Rebooker is a micro-SaaS that helps detailers, plumbers, electricians, cleaners, gardeners, salons, and repair shops stop losing leads to missed follow-ups. It's a **follow-up engine with a minimal CRM around it** — not a bloated generic CRM.
 
 ## What you get
 
@@ -53,7 +53,7 @@ Open http://localhost:3000.
 
 After seeding:
 
-- **Email:** `demo@followuppro.com`
+- **Email:** `demo@rebooker.io`
 - **Password:** `demo1234`
 
 The seed creates 5 contacts, 5 jobs in various statuses, 7 follow-up tasks (some overdue, some done), and the four default email templates.
@@ -68,7 +68,7 @@ See `.env.example` for the full list.
 | `NEXTAUTH_SECRET` | ✅ | Session token secret (generate with `openssl rand -base64 32`) |
 | `NEXTAUTH_URL` | ✅ | App URL (e.g. `http://localhost:3000`) |
 | `RESEND_API_KEY` |  | Needed to actually send email (otherwise emails are logged to the console) |
-| `RESEND_FROM_EMAIL` |  | Default: `Follow Up Pro <onboarding@resend.dev>` |
+| `RESEND_FROM_EMAIL` |  | Default: `Rebooker <onboarding@resend.dev>` |
 | `STRIPE_SECRET_KEY` |  | Needed for upgrades |
 | `STRIPE_WEBHOOK_SECRET` |  | Needed for the webhook handler |
 | `NEXT_PUBLIC_STRIPE_PRICE_PRO` |  | Stripe price ID for the Pro plan |
@@ -161,7 +161,7 @@ Overdue is computed at read time (`status === PENDING && dueDate < now`) — no 
 
 ## Manual test plan
 
-1. Log in as `demo@followuppro.com / demo1234`.
+1. Log in as `demo@rebooker.io / demo1234`.
 2. Dashboard shows KPIs, tasks due today, and overdue tasks.
 3. Create a new contact → create a job → change the job status to `QUOTED` → a new `QUOTE_FOLLOW_UP` task appears in Follow-ups with a +2 day due date.
 4. Open the task → email composer pre-fills subject and body from the template → send. With no `RESEND_API_KEY`, the email is logged to the server console. Task becomes `SENT`.

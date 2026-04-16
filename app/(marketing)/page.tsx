@@ -25,7 +25,7 @@ export default function LandingPage() {
             Never miss a customer follow-up again.
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">
-            Follow Up Pro helps local service businesses track leads, automate
+            Rebooker helps local service businesses track leads, automate
             follow-ups, and request reviews — without a bloated CRM.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">

@@ -36,7 +36,7 @@ export default async function BillingPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Billing" description="Manage your Follow Up Pro plan." />
+      <PageHeader title="Billing" description="Manage your Rebooker plan." />
 
       {sp.status === "success" ? (
         <div className="rounded-md border border-success/40 bg-success/10 px-4 py-3 text-sm text-success">

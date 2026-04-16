@@ -16,7 +16,7 @@ export async function sendEmail(params: {
   text: string;
 }): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const client = getResend();
-  const from = process.env.RESEND_FROM_EMAIL || "Follow Up Pro <onboarding@resend.dev>";
+  const from = process.env.RESEND_FROM_EMAIL || "Rebooker <onboarding@resend.dev>";
 
   if (!client) {
     // In dev without a Resend key, log instead of sending.

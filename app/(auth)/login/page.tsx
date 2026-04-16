@@ -10,7 +10,7 @@ export default function LoginPage() {
     <Card>
       <CardHeader>
         <CardTitle>Welcome back</CardTitle>
-        <CardDescription>Sign in to your Follow Up Pro account.</CardDescription>
+        <CardDescription>Sign in to your Rebooker account.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Suspense fallback={null}>

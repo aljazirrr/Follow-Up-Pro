@@ -3,7 +3,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Follow Up Pro",
+  title: "Rebooker",
   description:
     "Automated follow-ups for local service businesses. Track leads, automate follow-ups, and request reviews.",
 };
