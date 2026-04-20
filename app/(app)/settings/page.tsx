@@ -1,10 +1,12 @@
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default async function SettingsPage() {
   const user = await requireUser();
+  const t = getDictionary(getLocale()).settings;
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
     select: {
@@ -17,28 +19,28 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Settings" description="Your account details." />
+      <PageHeader title={t.title} description={t.desc} />
       <Card>
         <CardHeader>
-          <CardTitle>Account</CardTitle>
+          <CardTitle>{t.account}</CardTitle>
         </CardHeader>
         <CardContent>
           <dl className="grid gap-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                Email
+                {t.email}
               </dt>
               <dd>{dbUser?.email}</dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                Owner name
+                {t.ownerName}
               </dt>
               <dd>{dbUser?.ownerName ?? "—"}</dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                Member since
+                {t.memberSince}
               </dt>
               <dd>
                 {dbUser?.createdAt
@@ -48,7 +50,7 @@ export default async function SettingsPage() {
             </div>
           </dl>
           <p className="mt-4 text-xs text-muted-foreground">
-            Account editing coming soon. For now, data is managed in the database.
+            {t.editNote}
           </p>
         </CardContent>
       </Card>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,8 @@ export default async function ContactsPage({
 }) {
   const params = await searchParams;
   const user = await requireUser();
+  const t = getDictionary(getLocale());
+  const c = t.contacts;
 
   const q = params.q?.trim();
   const source = params.source;
@@ -52,14 +55,14 @@ export default async function ContactsPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Contacts"
-        description="Your leads and customers."
+        title={c.title}
+        description={c.desc}
         actions={
           <Link
             href="/contacts/new"
             className={buttonVariants({ size: "sm" })}
           >
-            <Plus className="h-4 w-4" /> New contact
+            <Plus className="h-4 w-4" /> {c.newContact}
           </Link>
         }
       />
@@ -74,16 +77,16 @@ export default async function ContactsPage({
               <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 name="q"
-                placeholder="Search by name, email, phone, company…"
+                placeholder={c.searchPlaceholder}
                 defaultValue={q ?? ""}
                 className="pl-8"
               />
             </div>
             <Select name="source" defaultValue={source ?? ""}>
-              <option value="">All sources</option>
+              <option value="">{c.allSources}</option>
               {Object.values(LeadSource).map((s) => (
                 <option key={s} value={s}>
-                  {s.toLowerCase()}
+                  {t.source[s]}
                 </option>
               ))}
             </Select>
@@ -91,24 +94,20 @@ export default async function ContactsPage({
               className={buttonVariants({ variant: "outline", size: "default" })}
               type="submit"
             >
-              Apply
+              {c.apply}
             </button>
           </form>
 
           {contacts.length === 0 ? (
             <EmptyState
-              title={q || source ? "No contacts match your filters" : "No contacts yet"}
-              description={
-                q || source
-                  ? "Try clearing your filters."
-                  : "Add your first lead to get started."
-              }
+              title={q || source ? c.noMatchTitle : c.noContactsTitle}
+              description={q || source ? c.noMatchDesc : c.noContactsDesc}
               action={
                 <Link
                   href="/contacts/new"
                   className={buttonVariants({ size: "sm" })}
                 >
-                  <Plus className="h-4 w-4" /> Add contact
+                  <Plus className="h-4 w-4" /> {c.addContact}
                 </Link>
               }
             />
@@ -116,36 +115,36 @@ export default async function ContactsPage({
             <Table>
               <THead>
                 <TR>
-                  <TH>Name</TH>
-                  <TH>Service</TH>
-                  <TH>Source</TH>
-                  <TH>Jobs</TH>
-                  <TH>Tasks</TH>
-                  <TH>Created</TH>
+                  <TH>{c.colName}</TH>
+                  <TH>{c.colService}</TH>
+                  <TH>{c.colSource}</TH>
+                  <TH>{c.colJobs}</TH>
+                  <TH>{c.colTasks}</TH>
+                  <TH>{c.colCreated}</TH>
                 </TR>
               </THead>
               <TBody>
-                {contacts.map((c) => (
-                  <TR key={c.id}>
+                {contacts.map((contact) => (
+                  <TR key={contact.id}>
                     <TD>
                       <Link
-                        href={`/contacts/${c.id}`}
+                        href={`/contacts/${contact.id}`}
                         className="font-medium hover:underline"
                       >
-                        {c.fullName}
+                        {contact.fullName}
                       </Link>
                       <div className="text-xs text-muted-foreground">
-                        {c.email || c.phone || "—"}
+                        {contact.email || contact.phone || "—"}
                       </div>
                     </TD>
-                    <TD>{c.serviceType || "—"}</TD>
+                    <TD>{contact.serviceType || "—"}</TD>
                     <TD className="text-sm text-muted-foreground">
-                      {c.source.toLowerCase()}
+                      {t.source[contact.source]}
                     </TD>
-                    <TD>{c._count.jobs}</TD>
-                    <TD>{c._count.tasks}</TD>
+                    <TD>{contact._count.jobs}</TD>
+                    <TD>{contact._count.tasks}</TD>
                     <TD className="text-sm text-muted-foreground">
-                      {formatDate(c.createdAt)}
+                      {formatDate(contact.createdAt)}
                     </TD>
                   </TR>
                 ))}

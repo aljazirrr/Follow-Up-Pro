@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmailComposer } from "@/components/followups/email-composer";
@@ -16,6 +17,7 @@ export default async function FollowUpDetailPage({
 }) {
   const { id } = await params;
   const user = await requireUser();
+  const t = getDictionary(getLocale()).followups;
 
   const task = await prisma.followUpTask.findFirst({
     where: { id, userId: user.id },
@@ -56,7 +58,7 @@ export default async function FollowUpDetailPage({
         href="/followups"
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" /> All follow-ups
+        <ArrowLeft className="h-4 w-4" /> {t.allFollowUps}
       </Link>
 
       <PageHeader
@@ -67,7 +69,7 @@ export default async function FollowUpDetailPage({
       {task.channel === "EMAIL" ? (
         <Card>
           <CardHeader>
-            <CardTitle>Compose email</CardTitle>
+            <CardTitle>{t.composeEmail}</CardTitle>
           </CardHeader>
           <CardContent>
             {task.contact.email ? (
@@ -79,7 +81,7 @@ export default async function FollowUpDetailPage({
               />
             ) : (
               <p className="text-sm text-muted-foreground">
-                This contact has no email address. Add one to send email follow-ups.
+                {t.noEmail}
               </p>
             )}
           </CardContent>
@@ -87,7 +89,7 @@ export default async function FollowUpDetailPage({
       ) : (
         <Card>
           <CardContent className="pt-6 text-sm text-muted-foreground">
-            This is a manual task. Mark it done from the list once you've completed it.
+            {t.manualTask}
           </CardContent>
         </Card>
       )}

@@ -8,10 +8,12 @@ import { registerUser } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "@/lib/i18n/client";
 
 export function RegisterForm() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const { t } = useTranslation();
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -29,19 +31,15 @@ export function RegisterForm() {
     const email = String(form.get("email") ?? "");
     const password = String(form.get("password") ?? "");
 
-    const signInRes = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    const signInRes = await signIn("credentials", { email, password, redirect: false });
     setSubmitting(false);
 
     if (!signInRes || signInRes.error) {
-      toast.error("Account created but sign-in failed. Please sign in manually.");
+      toast.error(t.auth.accountCreatedSignInFailed);
       router.push("/login");
       return;
     }
-    toast.success("Account created");
+    toast.success(t.auth.accountCreated);
     router.push("/dashboard");
     router.refresh();
   }
@@ -49,15 +47,15 @@ export function RegisterForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-3">
       <div className="space-y-1.5">
-        <Label htmlFor="ownerName">Your name</Label>
+        <Label htmlFor="ownerName">{t.auth.yourName}</Label>
         <Input id="ownerName" name="ownerName" required autoComplete="name" />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t.auth.email}</Label>
         <Input id="email" name="email" type="email" required autoComplete="email" />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t.auth.password}</Label>
         <Input
           id="password"
           name="password"
@@ -66,10 +64,10 @@ export function RegisterForm() {
           minLength={8}
           autoComplete="new-password"
         />
-        <p className="text-xs text-muted-foreground">At least 8 characters.</p>
+        <p className="text-xs text-muted-foreground">{t.auth.atLeast8}</p>
       </div>
       <Button type="submit" className="w-full" disabled={submitting}>
-        {submitting ? "Creating…" : "Create account"}
+        {submitting ? t.auth.creating : t.auth.createAccountBtn}
       </Button>
     </form>
   );

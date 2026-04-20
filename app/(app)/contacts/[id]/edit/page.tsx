@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { ContactForm } from "@/components/contacts/contact-form";
@@ -15,6 +16,7 @@ export default async function EditContactPage({
 }) {
   const { id } = await params;
   const user = await requireUser();
+  const t = getDictionary(getLocale()).contacts;
 
   const contact = await prisma.contact.findFirst({
     where: { id, userId: user.id },
@@ -27,11 +29,11 @@ export default async function EditContactPage({
         href={`/contacts/${contact.id}`}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to contact
+        <ArrowLeft className="h-4 w-4" /> {t.backToContact}
       </Link>
 
       <PageHeader
-        title="Edit contact"
+        title={t.editContact}
         description={contact.fullName}
         actions={<DeleteContactButton id={contact.id} />}
       />

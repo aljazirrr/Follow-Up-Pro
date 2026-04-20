@@ -13,19 +13,22 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const nav = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/contacts", label: "Contacts", icon: Users },
-  { href: "/jobs", label: "Jobs", icon: Briefcase },
-  { href: "/followups", label: "Follow-ups", icon: ListChecks },
-  { href: "/templates", label: "Templates", icon: Mail },
-  { href: "/billing", label: "Billing", icon: CreditCard },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+import { useTranslation } from "@/lib/i18n/client";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { t } = useTranslation();
+
+  const nav = [
+    { href: "/dashboard", label: t.nav.dashboard, icon: LayoutDashboard },
+    { href: "/contacts", label: t.nav.contacts, icon: Users },
+    { href: "/jobs", label: t.nav.jobs, icon: Briefcase },
+    { href: "/followups", label: t.nav.followups, icon: ListChecks },
+    { href: "/templates", label: t.nav.templates, icon: Mail },
+    { href: "/billing", label: t.nav.billing, icon: CreditCard },
+    { href: "/settings", label: t.nav.settings, icon: Settings },
+  ];
 
   return (
     <aside className="hidden w-60 shrink-0 border-r bg-card md:block">
@@ -57,6 +60,9 @@ export function Sidebar() {
           );
         })}
       </nav>
+      <div className="border-t p-4">
+        <LanguageSwitcher />
+      </div>
     </aside>
   );
 }

@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { Zap } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { getLocale, getDictionary } from "@/lib/i18n";
 
 export default function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = getLocale();
+  const t = getDictionary(locale);
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b bg-background">
@@ -18,23 +22,21 @@ export default function MarketingLayout({
             Rebooker
           </Link>
           <nav className="flex items-center gap-2">
+            <LanguageSwitcher />
             <Link
               href="/pricing"
               className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground"
             >
-              Pricing
+              {t.nav.pricing}
             </Link>
             <Link
               href="/login"
               className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
-              Sign in
+              {t.nav.signIn}
             </Link>
-            <Link
-              href="/register"
-              className={buttonVariants({ size: "sm" })}
-            >
-              Start free
+            <Link href="/register" className={buttonVariants({ size: "sm" })}>
+              {t.nav.startFree}
             </Link>
           </nav>
         </div>
@@ -42,13 +44,13 @@ export default function MarketingLayout({
       <main className="flex-1">{children}</main>
       <footer className="border-t bg-muted/20">
         <div className="container flex flex-col items-center justify-between gap-2 py-8 text-sm text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} Rebooker</p>
+          <p>{t.marketing.footer.replace("{year}", String(new Date().getFullYear()))}</p>
           <div className="flex gap-4">
             <Link href="/pricing" className="hover:text-foreground">
-              Pricing
+              {t.nav.pricing}
             </Link>
             <Link href="/login" className="hover:text-foreground">
-              Sign in
+              {t.nav.signIn}
             </Link>
           </div>
         </div>
