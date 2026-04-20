@@ -4,14 +4,16 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { startCheckout } from "@/actions/billing";
+import { useTranslation } from "@/lib/i18n/client";
 
 export function UpgradeButton({ configured }: { configured: boolean }) {
   const [pending, setPending] = useState(false);
+  const { t } = useTranslation();
+  const b = t.billing;
 
   async function onClick() {
     setPending(true);
     const res = await startCheckout();
-    // If redirect succeeded, we never reach here.
     if (res && !res.ok) {
       setPending(false);
       toast.error(res.error);
@@ -21,10 +23,9 @@ export function UpgradeButton({ configured }: { configured: boolean }) {
   if (!configured) {
     return (
       <div className="space-y-2">
-        <Button disabled>Upgrade to Pro</Button>
+        <Button disabled>{b.upgradeBtn}</Button>
         <p className="text-xs text-muted-foreground">
-          Stripe isn't configured. Set <code>STRIPE_SECRET_KEY</code> and{" "}
-          <code>NEXT_PUBLIC_STRIPE_PRICE_PRO</code> in <code>.env</code>.
+          {b.stripeNotConfigured}
         </p>
       </div>
     );
@@ -32,7 +33,7 @@ export function UpgradeButton({ configured }: { configured: boolean }) {
 
   return (
     <Button onClick={onClick} disabled={pending}>
-      {pending ? "Redirecting…" : "Upgrade to Pro"}
+      {pending ? b.redirecting : b.upgradeBtn}
     </Button>
   );
 }

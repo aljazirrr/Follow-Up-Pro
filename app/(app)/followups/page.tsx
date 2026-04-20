@@ -2,6 +2,7 @@ import Link from "next/link";
 import { endOfDay, startOfDay } from "date-fns";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -11,22 +12,23 @@ import type { Prisma } from "@prisma/client";
 
 type Filter = "today" | "overdue" | "upcoming" | "done" | "all";
 
-const TABS: { key: Filter; label: string }[] = [
-  { key: "today", label: "Due today" },
-  { key: "overdue", label: "Overdue" },
-  { key: "upcoming", label: "Upcoming" },
-  { key: "done", label: "Completed" },
-  { key: "all", label: "All" },
-];
-
 export default async function FollowUpsPage({
   searchParams,
 }: {
   searchParams: Promise<{ filter?: string }>;
 }) {
   const params = await searchParams;
+  const t = getDictionary(getLocale());
+  const f = t.followups;
+  const TABS: { key: Filter; label: string }[] = [
+    { key: "today", label: f.tabToday },
+    { key: "overdue", label: f.tabOverdue },
+    { key: "upcoming", label: f.tabUpcoming },
+    { key: "done", label: f.tabCompleted },
+    { key: "all", label: f.tabAll },
+  ];
   const filterParam = (params.filter ?? "today") as Filter;
-  const filter: Filter = TABS.some((t) => t.key === filterParam) ? filterParam : "today";
+  const filter: Filter = TABS.some((tab) => tab.key === filterParam) ? filterParam : "today";
   const user = await requireUser();
   const now = new Date();
 
@@ -64,8 +66,8 @@ export default async function FollowUpsPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Follow-ups"
-        description="Your auto-generated and manual tasks."
+        title={f.title}
+        description={f.desc}
       />
 
       <div className="flex flex-wrap gap-2 border-b">
@@ -89,15 +91,15 @@ export default async function FollowUpsPage({
         <CardContent className="space-y-3 pt-6">
           {tasks.length === 0 ? (
             <EmptyState
-              title="Nothing here"
+              title={f.nothingTitle}
               description={
                 filter === "today"
-                  ? "You're caught up for today."
+                  ? f.todayEmpty
                   : filter === "overdue"
-                    ? "No overdue tasks."
+                    ? f.overdueEmpty
                     : filter === "upcoming"
-                      ? "No upcoming tasks."
-                      : "No tasks match this view."
+                      ? f.upcomingEmpty
+                      : f.allEmpty
               }
             />
           ) : (

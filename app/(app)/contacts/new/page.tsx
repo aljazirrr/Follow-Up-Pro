@@ -1,13 +1,15 @@
+import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { ContactForm } from "@/components/contacts/contact-form";
 
 export default function NewContactPage() {
+  const t = getDictionary(getLocale());
   return (
     <div className="space-y-6">
       <PageHeader
-        title="New contact"
-        description="Add a lead or existing customer."
+        title={t.contacts.newTitle}
+        description={t.contacts.newDesc}
       />
       <Card>
         <CardContent className="pt-6">

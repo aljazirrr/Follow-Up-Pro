@@ -7,6 +7,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { TaskStatusBadge } from "@/components/shared/status-badge";
 import { updateTaskStatus } from "@/actions/followups";
 import { cn, formatDate, isOverdue, relativeFromNow } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/client";
 import type { FollowUpTask, Contact, Job } from "@prisma/client";
 
 type CardTask = FollowUpTask & {
@@ -15,10 +16,12 @@ type CardTask = FollowUpTask & {
 };
 
 export function FollowUpCard({ task }: { task: CardTask }) {
+  const { t } = useTranslation();
+  const f = t.followups;
   const overdue = isOverdue(task.status, task.dueDate);
   const dueLabel =
     task.status === "PENDING"
-      ? `Due ${formatDate(task.dueDate)} · ${relativeFromNow(task.dueDate)}`
+      ? `${f.due} ${formatDate(task.dueDate)} · ${relativeFromNow(task.dueDate)}`
       : `${formatDate(task.completedAt ?? task.dueDate)}`;
 
   async function mark(status: "DONE" | "SKIPPED") {
@@ -26,7 +29,7 @@ export function FollowUpCard({ task }: { task: CardTask }) {
     fd.set("taskId", task.id);
     fd.set("status", status);
     const res = await updateTaskStatus(fd);
-    if (res.ok) toast.success(status === "DONE" ? "Marked done" : "Skipped");
+    if (res.ok) toast.success(status === "DONE" ? f.markedDone : f.skipped);
     else toast.error(res.error);
   }
 
@@ -43,18 +46,10 @@ export function FollowUpCard({ task }: { task: CardTask }) {
           <span className="text-sm font-medium">{task.title}</span>
         </div>
         <div className="text-sm text-muted-foreground">
-          <Link
-            href={`/contacts/${task.contact.id}`}
-            className="hover:underline"
-          >
+          <Link href={`/contacts/${task.contact.id}`} className="hover:underline">
             {task.contact.fullName}
           </Link>
-          {task.job ? (
-            <>
-              {" · "}
-              <span>{task.job.title}</span>
-            </>
-          ) : null}
+          {task.job ? <>{" · "}<span>{task.job.title}</span></> : null}
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <CalendarClock className="h-3.5 w-3.5" />
@@ -63,23 +58,20 @@ export function FollowUpCard({ task }: { task: CardTask }) {
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {task.channel === "EMAIL" && task.status === "PENDING" ? (
-          <Link
-            href={`/followups/${task.id}`}
-            className={buttonVariants({ size: "sm" })}
-          >
+          <Link href={`/followups/${task.id}`} className={buttonVariants({ size: "sm" })}>
             <Mail className="h-4 w-4" />
-            Send email
+            {f.sendEmailBtn}
           </Link>
         ) : null}
         {task.status === "PENDING" ? (
           <>
             <Button size="sm" variant="outline" onClick={() => mark("DONE")}>
               <Check className="h-4 w-4" />
-              Done
+              {f.done}
             </Button>
             <Button size="sm" variant="ghost" onClick={() => mark("SKIPPED")}>
               <SkipForward className="h-4 w-4" />
-              Skip
+              {f.skip}
             </Button>
           </>
         ) : null}

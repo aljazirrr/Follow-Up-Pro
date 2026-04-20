@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
+import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
@@ -19,6 +20,8 @@ export default async function JobsPage({
 }) {
   const params = await searchParams;
   const user = await requireUser();
+  const t = getDictionary(getLocale());
+  const j = t.jobs;
 
   const where: Prisma.JobWhereInput = { userId: user.id };
   if (params.status && Object.values(JobStatus).includes(params.status as JobStatus)) {
@@ -34,17 +37,17 @@ export default async function JobsPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Jobs"
-        description="All your opportunities and projects."
+        title={j.title}
+        description={j.desc}
       />
       <Card>
         <CardContent className="pt-6">
           <form method="get" className="mb-4 flex gap-3">
             <Select name="status" defaultValue={params.status ?? ""}>
-              <option value="">All statuses</option>
+              <option value="">{j.allStatuses}</option>
               {Object.values(JobStatus).map((s) => (
                 <option key={s} value={s}>
-                  {s.replace(/_/g, " ").toLowerCase()}
+                  {t.status.job[s]}
                 </option>
               ))}
             </Select>
@@ -52,25 +55,25 @@ export default async function JobsPage({
               className={buttonVariants({ variant: "outline", size: "default" })}
               type="submit"
             >
-              Apply
+              {j.apply}
             </button>
           </form>
 
           {jobs.length === 0 ? (
             <EmptyState
-              title="No jobs yet"
-              description="Create a job from a contact's detail page."
+              title={j.noJobsTitle}
+              description={j.noJobsDesc}
             />
           ) : (
             <Table>
               <THead>
                 <TR>
-                  <TH>Title</TH>
-                  <TH>Contact</TH>
-                  <TH>Value</TH>
-                  <TH>Status</TH>
-                  <TH>Change status</TH>
-                  <TH>Created</TH>
+                  <TH>{j.colTitle}</TH>
+                  <TH>{j.colContact}</TH>
+                  <TH>{j.colValue}</TH>
+                  <TH>{j.colStatus}</TH>
+                  <TH>{j.colChangeStatus}</TH>
+                  <TH>{j.colCreated}</TH>
                 </TR>
               </THead>
               <TBody>

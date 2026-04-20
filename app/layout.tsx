@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Toaster } from "sonner";
+import { LanguageProvider } from "@/lib/i18n/client";
+import type { Locale } from "@/lib/i18n/dictionaries";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,11 +16,14 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const locale = (cookies().get("locale")?.value as Locale | undefined) ?? "en";
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        {children}
-        <Toaster position="top-right" richColors closeButton />
+        <LanguageProvider locale={locale}>
+          {children}
+          <Toaster position="top-right" richColors closeButton />
+        </LanguageProvider>
       </body>
     </html>
   );

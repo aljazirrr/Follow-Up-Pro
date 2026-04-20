@@ -10,8 +10,29 @@ import {
 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getLocale, getDictionary } from "@/lib/i18n";
 
 export default function LandingPage() {
+  const locale = getLocale();
+  const t = getDictionary(locale);
+  const m = t.marketing;
+
+  const problems = [m.p1, m.p2, m.p3, m.p4];
+  const solutions = [m.s1, m.s2, m.s3, m.s4];
+  const features = [
+    { icon: Users, title: m.f1Title, desc: m.f1Desc },
+    { icon: ListChecks, title: m.f2Title, desc: m.f2Desc },
+    { icon: Mail, title: m.f3Title, desc: m.f3Desc },
+    { icon: AlertTriangle, title: m.f4Title, desc: m.f4Desc },
+    { icon: Star, title: m.f5Title, desc: m.f5Desc },
+    { icon: Zap, title: m.f6Title, desc: m.f6Desc },
+  ];
+  const steps = [
+    { n: 1, t: m.step1Title, d: m.step1Desc },
+    { n: 2, t: m.step2Title, d: m.step2Desc },
+    { n: 3, t: m.step3Title, d: m.step3Desc },
+  ];
+
   return (
     <div>
       {/* Hero */}
@@ -19,27 +40,23 @@ export default function LandingPage() {
         <div className="container py-16 text-center md:py-24">
           <div className="mx-auto inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground">
             <Zap className="h-3 w-3" />
-            Automated follow-ups for local service businesses
+            {m.badge}
           </div>
           <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-            Never miss a customer follow-up again.
+            {m.hero}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">
-            Rebooker helps local service businesses track leads, automate
-            follow-ups, and request reviews — without a bloated CRM.
+            {m.heroSub}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/register"
-              className={buttonVariants({ size: "lg" })}
-            >
-              Start free
+            <Link href="/register" className={buttonVariants({ size: "lg" })}>
+              {m.startFree}
             </Link>
             <Link
               href="/pricing"
               className={buttonVariants({ variant: "outline", size: "lg" })}
             >
-              View pricing
+              {m.viewPricing}
             </Link>
           </div>
         </div>
@@ -49,16 +66,9 @@ export default function LandingPage() {
       <section className="container py-16">
         <div className="grid gap-8 md:grid-cols-2">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">
-              Lost follow-ups = lost revenue
-            </h2>
+            <h2 className="text-2xl font-semibold tracking-tight">{m.problemTitle}</h2>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-              {[
-                "You send a quote and never hear back.",
-                "The job's done but you forget to ask for a review.",
-                "Your client list lives in WhatsApp, Excel, or your head.",
-                "Generic CRMs are too heavy for a 1–10 person team.",
-              ].map((p) => (
+              {problems.map((p) => (
                 <li key={p} className="flex items-start gap-2">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
                   {p}
@@ -67,19 +77,12 @@ export default function LandingPage() {
             </ul>
           </div>
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">
-              A follow-up engine with a mini-CRM around it
-            </h2>
+            <h2 className="text-2xl font-semibold tracking-tight">{m.solutionTitle}</h2>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-              {[
-                "See exactly who to contact today.",
-                "Auto-generated tasks when a quote is sent, a job is won, or work is completed.",
-                "Send branded emails from built-in templates.",
-                "Stay simple. No drag-and-drop workflow builder.",
-              ].map((p) => (
-                <li key={p} className="flex items-start gap-2">
+              {solutions.map((s) => (
+                <li key={s} className="flex items-start gap-2">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-                  {p}
+                  {s}
                 </li>
               ))}
             </ul>
@@ -91,41 +94,10 @@ export default function LandingPage() {
       <section className="border-t bg-muted/30">
         <div className="container py-16">
           <h2 className="text-center text-2xl font-semibold tracking-tight">
-            Built for small service teams
+            {m.featuresTitle}
           </h2>
           <div className="mt-10 grid gap-4 md:grid-cols-3">
-            {[
-              {
-                icon: Users,
-                title: "Simple contacts",
-                desc: "Add leads and customers in seconds. No custom-field rabbit hole.",
-              },
-              {
-                icon: ListChecks,
-                title: "Auto follow-ups",
-                desc: "Quote sent → task in 2 days. Job won → confirmation. Job done → ask for a review.",
-              },
-              {
-                icon: Mail,
-                title: "Email templates",
-                desc: "Pre-written messages with {{customer_name}} placeholders you can edit.",
-              },
-              {
-                icon: AlertTriangle,
-                title: "Overdue alerts",
-                desc: "The dashboard flags everything that slipped so nothing falls through.",
-              },
-              {
-                icon: Star,
-                title: "Review requests",
-                desc: "Every completed job triggers a review request task automatically.",
-              },
-              {
-                icon: Zap,
-                title: "Fast UI",
-                desc: "Designed for clarity and speed — not for training sessions.",
-              },
-            ].map((f) => {
+            {features.map((f) => {
               const Icon = f.icon;
               return (
                 <Card key={f.title}>
@@ -143,15 +115,9 @@ export default function LandingPage() {
 
       {/* How it works */}
       <section className="container py-16">
-        <h2 className="text-center text-2xl font-semibold tracking-tight">
-          How it works
-        </h2>
+        <h2 className="text-center text-2xl font-semibold tracking-tight">{m.howTitle}</h2>
         <ol className="mx-auto mt-10 grid max-w-3xl gap-6 md:grid-cols-3">
-          {[
-            { n: 1, t: "Add a contact", d: "Enter the basics — name, phone, email, service type." },
-            { n: 2, t: "Create a job", d: "Track the opportunity and move it through statuses." },
-            { n: 3, t: "Follow-ups show up", d: "The right tasks appear automatically in your dashboard." },
-          ].map((s) => (
+          {steps.map((s) => (
             <li key={s.n} className="rounded-lg border bg-card p-5">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
                 {s.n}
@@ -166,24 +132,17 @@ export default function LandingPage() {
       {/* CTA */}
       <section className="border-t bg-muted/30">
         <div className="container py-16 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Stop losing leads to inbox amnesia.
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Start free. Upgrade when your team grows.
-          </p>
+          <h2 className="text-2xl font-semibold tracking-tight">{m.ctaTitle}</h2>
+          <p className="mt-2 text-sm text-muted-foreground">{m.ctaSub}</p>
           <div className="mt-6 flex justify-center gap-3">
-            <Link
-              href="/register"
-              className={buttonVariants({ size: "lg" })}
-            >
-              Create your account
+            <Link href="/register" className={buttonVariants({ size: "lg" })}>
+              {m.createAccount}
             </Link>
             <Link
               href="/pricing"
               className={buttonVariants({ variant: "outline", size: "lg" })}
             >
-              See pricing
+              {m.seePricing}
             </Link>
           </div>
         </div>

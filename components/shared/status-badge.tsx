@@ -1,36 +1,33 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import type { JobStatus, TaskStatus } from "@prisma/client";
+import { useTranslation } from "@/lib/i18n/client";
 
 export function JobStatusBadge({ status }: { status: JobStatus }) {
-  const map: Record<JobStatus, { label: string; variant: "default" | "secondary" | "success" | "warning" | "destructive" | "muted" }> = {
-    NEW: { label: "New", variant: "secondary" },
-    QUOTED: { label: "Quoted", variant: "warning" },
-    WON: { label: "Won", variant: "success" },
-    COMPLETED: { label: "Completed", variant: "success" },
-    REVIEW_REQUESTED: { label: "Review requested", variant: "default" },
-    LOST: { label: "Lost", variant: "destructive" },
+  const { t } = useTranslation();
+  const variants: Record<JobStatus, "default" | "secondary" | "success" | "warning" | "destructive" | "muted"> = {
+    NEW: "secondary",
+    QUOTED: "warning",
+    WON: "success",
+    COMPLETED: "success",
+    REVIEW_REQUESTED: "default",
+    LOST: "destructive",
   };
-  const { label, variant } = map[status];
-  return <Badge variant={variant}>{label}</Badge>;
+  return <Badge variant={variants[status]}>{t.status.job[status]}</Badge>;
 }
 
-export function TaskStatusBadge({
-  status,
-  overdue,
-}: {
-  status: TaskStatus;
-  overdue?: boolean;
-}) {
+export function TaskStatusBadge({ status, overdue }: { status: TaskStatus; overdue?: boolean }) {
+  const { t } = useTranslation();
   if (overdue && status === "PENDING") {
-    return <Badge variant="destructive">Overdue</Badge>;
+    return <Badge variant="destructive">{t.status.task.OVERDUE}</Badge>;
   }
-  const map: Record<TaskStatus, { label: string; variant: "default" | "secondary" | "success" | "warning" | "destructive" | "muted" }> = {
-    PENDING: { label: "Pending", variant: "secondary" },
-    SENT: { label: "Sent", variant: "success" },
-    DONE: { label: "Done", variant: "success" },
-    SKIPPED: { label: "Skipped", variant: "muted" },
-    OVERDUE: { label: "Overdue", variant: "destructive" },
+  const variants: Record<TaskStatus, "default" | "secondary" | "success" | "warning" | "destructive" | "muted"> = {
+    PENDING: "secondary",
+    SENT: "success",
+    DONE: "success",
+    SKIPPED: "muted",
+    OVERDUE: "destructive",
   };
-  const { label, variant } = map[status];
-  return <Badge variant={variant}>{label}</Badge>;
+  return <Badge variant={variants[status]}>{t.status.task[status]}</Badge>;
 }
