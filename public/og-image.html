@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1200" />
+  <title>OG Image — Rebooker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+    }
+
+    .wrap {
+      width: 1200px;
+      height: 630px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 60px 72px;
+      position: relative;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f1f3a 100%);
+    }
+
+    /* Decorative glow */
+    .wrap::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      right: -60px;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(ellipse, rgba(99,102,241,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .wrap::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: 60px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(ellipse, rgba(16,185,129,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Top bar */
+    .top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-mark {
+      width: 40px;
+      height: 40px;
+      background: #6366f1;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+
+    .logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.5px;
+    }
+
+    .badge {
+      margin-left: 16px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      border: 1px solid rgba(99,102,241,0.4);
+      background: rgba(99,102,241,0.1);
+      font-size: 13px;
+      font-weight: 500;
+      color: #a5b4fc;
+    }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 32px 0 24px;
+    }
+
+    h1 {
+      font-size: 62px;
+      font-weight: 800;
+      color: #f8fafc;
+      line-height: 1.08;
+      letter-spacing: -2px;
+      max-width: 760px;
+    }
+
+    h1 span {
+      background: linear-gradient(90deg, #6366f1, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sub {
+      margin-top: 20px;
+      font-size: 22px;
+      color: #94a3b8;
+      font-weight: 400;
+      line-height: 1.5;
+      max-width: 680px;
+    }
+
+    /* Bullets */
+    .bullets {
+      margin-top: 32px;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .bullet {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+
+    .check {
+      width: 20px;
+      height: 20px;
+      background: rgba(16,185,129,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #10b981;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* Bottom */
+    .bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .url {
+      font-size: 18px;
+      font-weight: 600;
+      color: #475569;
+      letter-spacing: 0.3px;
+    }
+
+    .cta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cta-badge {
+      padding: 10px 24px;
+      background: #6366f1;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .free-badge {
+      padding: 10px 24px;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="logo-mark">R</div>
+      <span class="logo-text">Rebooker</span>
+      <span class="badge">For local service businesses</span>
+    </div>
+
+    <div class="main">
+      <h1>Stop losing customers to <span>forgotten follow-ups.</span></h1>
+      <p class="sub">
+        Automated quote follow-ups, booking confirmations &amp; review requests — all in one tool built for service businesses.
+      </p>
+      <div class="bullets">
+        <div class="bullet">
+          <div class="check">✓</div>
+          Auto follow-up on every quote
+        </div>
+        <div class="bullet">
+          <div class="check">✓</div>
+          Review requests after every job
+        </div>
+        <div class="bullet">
+          <div class="check">✓</div>
+          Free to start
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <span class="url">rebooker.io</span>
+      <div class="cta">
+        <span class="free-badge">No credit card needed</span>
+        <span class="cta-badge">Start free →</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
