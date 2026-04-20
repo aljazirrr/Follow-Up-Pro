@@ -29,12 +29,12 @@ export async function generateMetadata(): Promise<Metadata> {
     title: locale === "nl" ? titleNL : titleEN,
     description: locale === "nl" ? descNL : descEN,
     openGraph: {
-      title: m.hero,
+      title: `Rebooker — ${m.hero}`,
       description: m.heroSub,
       url: SITE_URL,
     },
     twitter: {
-      title: m.hero,
+      title: `Rebooker — ${m.hero}`,
       description: m.heroSub,
     },
   };
