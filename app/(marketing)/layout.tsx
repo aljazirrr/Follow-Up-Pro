@@ -49,6 +49,9 @@ export default function MarketingLayout({
             <Link href="/pricing" className="hover:text-foreground">
               {t.nav.pricing}
             </Link>
+            <Link href="/privacy" className="hover:text-foreground">
+              {t.nav.privacy}
+            </Link>
             <Link href="/login" className="hover:text-foreground">
               {t.nav.signIn}
             </Link>
