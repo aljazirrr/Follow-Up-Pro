@@ -6,13 +6,16 @@ import { requireUser } from "@/lib/auth";
 import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { JobForm } from "@/components/jobs/job-form";
 import { JobStatusSelect } from "@/components/jobs/job-status-select";
 import { FollowUpCard } from "@/components/followups/followup-card";
-import { JobStatusBadge } from "@/components/shared/status-badge";
+import { ContactStatusBadge, JobStatusBadge } from "@/components/shared/status-badge";
+import { ReactivateButton } from "@/components/contacts/reactivate-button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { shouldMarkInactive } from "@/lib/contact-status";
+import type { ContactStatus } from "@prisma/client";
 
 export default async function ContactDetailPage({
   params,
@@ -39,6 +42,18 @@ export default async function ContactDetailPage({
   });
   if (!contact) notFound();
 
+  // Lazy INACTIVE evaluation: update DB if criteria met
+  let currentStatus: ContactStatus = contact.status;
+  if (shouldMarkInactive(contact)) {
+    await prisma.contact.update({
+      where: { id: contact.id },
+      data: { status: "INACTIVE" },
+    });
+    currentStatus = "INACTIVE";
+  }
+
+  const showReactivate = currentStatus === "INACTIVE" || currentStatus === "LOST";
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -54,12 +69,15 @@ export default async function ContactDetailPage({
         title={contact.fullName}
         description={[contact.serviceType, contact.companyName].filter(Boolean).join(" · ") || "Contact"}
         actions={
-          <Link
-            href={`/contacts/${contact.id}/edit`}
-            className={buttonVariants({ size: "sm", variant: "outline" })}
-          >
-            <Pencil className="h-4 w-4" /> {c.edit}
-          </Link>
+          <div className="flex items-center gap-2">
+            {showReactivate && <ReactivateButton contactId={contact.id} />}
+            <Link
+              href={`/contacts/${contact.id}/edit`}
+              className={buttonVariants({ size: "sm", variant: "outline" })}
+            >
+              <Pencil className="h-4 w-4" /> {c.edit}
+            </Link>
+          </div>
         }
       />
 
@@ -70,6 +88,22 @@ export default async function ContactDetailPage({
           </CardHeader>
           <CardContent>
             <dl className="grid gap-3 text-sm">
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">{c.colStatus}</dt>
+                <dd><ContactStatusBadge status={currentStatus} /></dd>
+              </div>
+              {contact.lastContactedAt && (
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-muted-foreground">{c.lastContacted}</dt>
+                  <dd>{formatDate(contact.lastContactedAt)}</dd>
+                </div>
+              )}
+              {contact.nextActionAt && (
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-muted-foreground">{c.nextAction}</dt>
+                  <dd>{formatDate(contact.nextActionAt)}</dd>
+                </div>
+              )}
               <div>
                 <dt className="text-xs uppercase tracking-wide text-muted-foreground">{c.emailLabel}</dt>
                 <dd>{contact.email || "—"}</dd>

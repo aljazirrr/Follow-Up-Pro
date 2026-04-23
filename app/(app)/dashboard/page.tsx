@@ -9,6 +9,7 @@ import {
   ListChecks,
   AlertTriangle,
   Plus,
+  UserX,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
@@ -20,6 +21,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
+import { inactiveWhereClause } from "@/lib/contact-status";
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -37,6 +39,7 @@ export default async function DashboardPage() {
       prisma.followUpTask.count({
         where: { userId: user.id, type: "REVIEW_REQUEST" },
       }),
+      prisma.contact.count({ where: inactiveWhereClause(user.id, now) }),
     ]),
     prisma.followUpTask.findMany({
       where: {
@@ -71,7 +74,7 @@ export default async function DashboardPage() {
     }),
   ]);
 
-  const [totalContacts, quoted, won, completed, reviewRequested] = counts;
+  const [totalContacts, quoted, won, completed, reviewRequested, inactiveCount] = counts;
 
   return (
     <div className="space-y-6">
@@ -91,12 +94,13 @@ export default async function DashboardPage() {
       />
 
       {/* KPIs */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
         <KPIStatCard label={d.totalLeads} value={totalContacts} icon={Users} />
         <KPIStatCard label={d.quoted} value={quoted} icon={FileText} tone="warning" />
         <KPIStatCard label={d.won} value={won} icon={Trophy} tone="success" />
         <KPIStatCard label={d.completed} value={completed} icon={CheckCircle2} tone="success" />
         <KPIStatCard label={d.reviewRequested} value={reviewRequested} icon={Star} />
+        <KPIStatCard label={d.inactive} value={inactiveCount} icon={UserX} tone="destructive" href="/contacts?status=INACTIVE" />
       </div>
 
       {/* Today + overdue */}
