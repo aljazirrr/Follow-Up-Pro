@@ -10,12 +10,14 @@ import { Select } from "@/components/ui/select";
 import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
+import { ContactStatusBadge } from "@/components/shared/status-badge";
 import { formatDate } from "@/lib/utils";
-import { LeadSource, Prisma } from "@prisma/client";
+import { ContactStatus, LeadSource, Prisma } from "@prisma/client";
 
 type SearchParams = {
   q?: string;
   source?: string;
+  status?: string;
 };
 
 export default async function ContactsPage({
@@ -30,6 +32,7 @@ export default async function ContactsPage({
 
   const q = params.q?.trim();
   const source = params.source;
+  const statusFilter = params.status;
 
   const where: Prisma.ContactWhereInput = { userId: user.id };
   if (q) {
@@ -43,10 +46,14 @@ export default async function ContactsPage({
   if (source && Object.values(LeadSource).includes(source as LeadSource)) {
     where.source = source as LeadSource;
   }
+  if (statusFilter && Object.values(ContactStatus).includes(statusFilter as ContactStatus)) {
+    where.status = statusFilter as ContactStatus;
+  }
 
   const contacts = await prisma.contact.findMany({
     where,
     orderBy: { createdAt: "desc" },
+    take: 100,
     include: {
       _count: { select: { jobs: true, tasks: true } },
     },
@@ -71,7 +78,7 @@ export default async function ContactsPage({
         <CardContent className="pt-6">
           <form
             method="get"
-            className="mb-4 grid gap-3 sm:grid-cols-[1fr_200px_auto]"
+            className="mb-4 grid gap-3 sm:grid-cols-[1fr_160px_160px_auto]"
           >
             <div className="relative">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -90,6 +97,14 @@ export default async function ContactsPage({
                 </option>
               ))}
             </Select>
+            <Select name="status" defaultValue={statusFilter ?? ""}>
+              <option value="">{c.allStatuses}</option>
+              {Object.values(ContactStatus).map((s) => (
+                <option key={s} value={s}>
+                  {t.contactStatus[s]}
+                </option>
+              ))}
+            </Select>
             <button
               className={buttonVariants({ variant: "outline", size: "default" })}
               type="submit"
@@ -100,8 +115,8 @@ export default async function ContactsPage({
 
           {contacts.length === 0 ? (
             <EmptyState
-              title={q || source ? c.noMatchTitle : c.noContactsTitle}
-              description={q || source ? c.noMatchDesc : c.noContactsDesc}
+              title={q || source || statusFilter ? c.noMatchTitle : c.noContactsTitle}
+              description={q || source || statusFilter ? c.noMatchDesc : c.noContactsDesc}
               action={
                 <Link
                   href="/contacts/new"
@@ -117,6 +132,7 @@ export default async function ContactsPage({
                 <TR>
                   <TH>{c.colName}</TH>
                   <TH>{c.colService}</TH>
+                  <TH>{c.colStatus}</TH>
                   <TH>{c.colSource}</TH>
                   <TH>{c.colJobs}</TH>
                   <TH>{c.colTasks}</TH>
@@ -138,6 +154,9 @@ export default async function ContactsPage({
                       </div>
                     </TD>
                     <TD>{contact.serviceType || "—"}</TD>
+                    <TD>
+                      <ContactStatusBadge status={contact.status} />
+                    </TD>
                     <TD className="text-sm text-muted-foreground">
                       {t.source[contact.source]}
                     </TD>

@@ -32,6 +32,7 @@ export default async function JobsPage({
     where,
     include: { contact: true },
     orderBy: { createdAt: "desc" },
+    take: 100,
   });
 
   return (
@@ -77,26 +78,26 @@ export default async function JobsPage({
                 </TR>
               </THead>
               <TBody>
-                {jobs.map((j) => (
-                  <TR key={j.id}>
-                    <TD className="font-medium">{j.title}</TD>
+                {jobs.map((job) => (
+                  <TR key={job.id}>
+                    <TD className="font-medium">{job.title}</TD>
                     <TD>
                       <Link
-                        href={`/contacts/${j.contact.id}`}
+                        href={`/contacts/${job.contact.id}`}
                         className="hover:underline"
                       >
-                        {j.contact.fullName}
+                        {job.contact.fullName}
                       </Link>
                     </TD>
-                    <TD>{formatCurrency(j.estimatedValue, j.currency)}</TD>
+                    <TD>{formatCurrency(job.estimatedValue, job.currency)}</TD>
                     <TD>
-                      <JobStatusBadge status={j.status} />
+                      <JobStatusBadge status={job.status} />
                     </TD>
                     <TD>
-                      <JobStatusSelect jobId={j.id} status={j.status} />
+                      <JobStatusSelect jobId={job.id} status={job.status} />
                     </TD>
                     <TD className="text-sm text-muted-foreground">
-                      {formatDate(j.createdAt)}
+                      {formatDate(job.createdAt)}
                     </TD>
                   </TR>
                 ))}

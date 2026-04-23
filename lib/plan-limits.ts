@@ -1,5 +1,8 @@
 import { prisma } from "./db";
 import { startOfMonth } from "date-fns";
+import type { PrismaClient } from "@prisma/client";
+
+type DbClient = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
 
 export const PLAN_LIMITS = {
   FREE: {
@@ -21,16 +24,16 @@ export class PlanLimitError extends Error {
   }
 }
 
-async function getPlan(userId: string): Promise<"FREE" | "PRO"> {
-  const sub = await prisma.subscription.findUnique({ where: { userId } });
+async function getPlan(userId: string, db: DbClient = prisma): Promise<"FREE" | "PRO"> {
+  const sub = await db.subscription.findUnique({ where: { userId } });
   return sub?.plan === "PRO" ? "PRO" : "FREE";
 }
 
-export async function assertCanCreateContact(userId: string): Promise<void> {
-  const plan = await getPlan(userId);
+export async function assertCanCreateContact(userId: string, db: DbClient = prisma): Promise<void> {
+  const plan = await getPlan(userId, db);
   const limit = PLAN_LIMITS[plan].contacts;
   if (limit === Infinity) return;
-  const count = await prisma.contact.count({ where: { userId } });
+  const count = await db.contact.count({ where: { userId } });
   if (count >= limit) {
     throw new PlanLimitError(
       `Free plan is limited to ${limit} contacts. Upgrade to Pro for unlimited contacts.`
@@ -38,11 +41,11 @@ export async function assertCanCreateContact(userId: string): Promise<void> {
   }
 }
 
-export async function assertCanCreateTask(userId: string): Promise<void> {
-  const plan = await getPlan(userId);
+export async function assertCanCreateTask(userId: string, db: DbClient = prisma): Promise<void> {
+  const plan = await getPlan(userId, db);
   const limit = PLAN_LIMITS[plan].tasksPerMonth;
   if (limit === Infinity) return;
-  const count = await prisma.followUpTask.count({
+  const count = await db.followUpTask.count({
     where: { userId, createdAt: { gte: startOfMonth(new Date()) } },
   });
   if (count >= limit) {

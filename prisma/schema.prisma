@@ -53,6 +53,15 @@ enum LeadSource {
   OTHER
 }
 
+enum ContactStatus {
+  LEAD
+  ACTIVE
+  WON
+  COMPLETED
+  INACTIVE
+  LOST
+}
+
 enum SubscriptionStatus {
   ACTIVE
   CANCELED
@@ -68,11 +77,13 @@ model User {
   email          String    @unique
   emailVerified  DateTime?
   name           String?
-  ownerName      String?
-  hashedPassword String?
-  image          String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  ownerName             String?
+  hashedPassword        String?
+  image                 String?
+  quoteFollowUpDays     Int     @default(2)
+  reviewRequestDays     Int     @default(1)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   accounts      Account[]
   sessions      Session[]
@@ -132,10 +143,13 @@ model Contact {
   email       String?
   companyName String?
   serviceType String?
-  source      LeadSource @default(MANUAL)
-  notes       String?    @db.Text
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  source          LeadSource    @default(MANUAL)
+  status          ContactStatus @default(LEAD)
+  lastContactedAt DateTime?
+  nextActionAt    DateTime?
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   jobs  Job[]
@@ -143,6 +157,7 @@ model Contact {
 
   @@index([userId])
   @@index([userId, createdAt])
+  @@index([userId, status])
 }
 
 model Job {
@@ -168,6 +183,7 @@ model Job {
   @@index([userId])
   @@index([contactId])
   @@index([userId, status])
+  @@index([userId, status, createdAt])
 }
 
 model FollowUpTask {
@@ -195,6 +211,7 @@ model FollowUpTask {
   @@index([jobId])
   @@index([userId, status])
   @@index([userId, dueDate])
+  @@index([userId, status, dueDate])
 }
 
 model MessageTemplate {

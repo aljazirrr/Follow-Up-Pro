@@ -23,17 +23,17 @@ export async function createContact(formData: FormData): Promise<ActionResult> {
     return { ok: false, error: parsed.error.errors[0]?.message ?? "Invalid input" };
   }
 
+  const data = clean(parsed.data);
+  let contact: { id: string };
   try {
-    await assertCanCreateContact(user.id);
+    contact = await prisma.$transaction(async (tx) => {
+      await assertCanCreateContact(user.id, tx);
+      return tx.contact.create({ data: { ...data, userId: user.id } });
+    });
   } catch (err) {
     if (err instanceof PlanLimitError) return { ok: false, error: err.message };
     throw err;
   }
-
-  const data = clean(parsed.data);
-  const contact = await prisma.contact.create({
-    data: { ...data, userId: user.id },
-  });
 
   revalidatePath("/contacts");
   revalidatePath("/dashboard");

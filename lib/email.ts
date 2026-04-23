@@ -3,6 +3,9 @@ import { Resend } from "resend";
 
 let resend: Resend | null = null;
 
+const log = (msg: string, meta?: Record<string, unknown>) =>
+  console.log(JSON.stringify({ ts: new Date().toISOString(), src: "email", msg, ...meta }));
+
 function getResend(): Resend | null {
   const key = process.env.RESEND_API_KEY;
   if (!key) return null;
@@ -19,12 +22,12 @@ export async function sendEmail(params: {
   const from = process.env.RESEND_FROM_EMAIL || "Rebooker <onboarding@resend.dev>";
 
   if (!client) {
-    // In dev without a Resend key, log instead of sending.
-    console.warn("[email] RESEND_API_KEY not set — skipping send and logging instead.");
-    console.warn(`[email] to=${params.to} subject=${params.subject}`);
-    console.warn(params.text);
+    log("no_api_key_dev_mode", { to: params.to, subject: params.subject });
+    console.log(params.text);
     return { ok: true, id: "dev-no-op" };
   }
+
+  log("sending", { to: params.to, subject: params.subject });
 
   try {
     const res = await client.emails.send({
@@ -33,10 +36,15 @@ export async function sendEmail(params: {
       subject: params.subject,
       text: params.text,
     });
-    if (res.error) return { ok: false, error: res.error.message };
+    if (res.error) {
+      log("send_error", { to: params.to, error: res.error.message });
+      return { ok: false, error: res.error.message };
+    }
+    log("sent", { to: params.to, id: res.data?.id });
     return { ok: true, id: res.data?.id ?? "unknown" };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
+    log("send_exception", { to: params.to, error: message });
     return { ok: false, error: message };
   }
 }

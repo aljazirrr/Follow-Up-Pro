@@ -61,6 +61,7 @@ export default async function FollowUpsPage({
       job: { select: { id: true, title: true } },
     },
     orderBy: { dueDate: filter === "done" ? "desc" : "asc" },
+    take: 100,
   });
 
   return (

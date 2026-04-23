@@ -151,6 +151,7 @@ const en = {
     newContact: "New contact",
     searchPlaceholder: "Search by name, email, phone, company…",
     allSources: "All sources",
+    allStatuses: "All statuses",
     apply: "Apply",
     noMatchTitle: "No contacts match your filters",
     noContactsTitle: "No contacts yet",
@@ -159,6 +160,7 @@ const en = {
     addContact: "Add contact",
     colName: "Name",
     colService: "Service",
+    colStatus: "Status",
     colSource: "Source",
     colJobs: "Jobs",
     colTasks: "Tasks",
@@ -368,6 +370,14 @@ const en = {
   topbar: {
     signedInAs: "Signed in as",
   },
+  contactStatus: {
+    LEAD: "Lead",
+    ACTIVE: "Active",
+    WON: "Won",
+    COMPLETED: "Completed",
+    INACTIVE: "Inactive",
+    LOST: "Lost",
+  },
   status: {
     job: {
       NEW: "New",
@@ -546,6 +556,7 @@ const nl: typeof en = {
     newContact: "Nieuw contact",
     searchPlaceholder: "Zoek op naam, e-mail, telefoon, bedrijf…",
     allSources: "Alle bronnen",
+    allStatuses: "Alle statussen",
     apply: "Toepassen",
     noMatchTitle: "Geen contacten komen overeen met je filters",
     noContactsTitle: "Nog geen contacten",
@@ -554,6 +565,7 @@ const nl: typeof en = {
     addContact: "Contact toevoegen",
     colName: "Naam",
     colService: "Service",
+    colStatus: "Status",
     colSource: "Bron",
     colJobs: "Opdrachten",
     colTasks: "Taken",
@@ -762,6 +774,14 @@ const nl: typeof en = {
   },
   topbar: {
     signedInAs: "Ingelogd als",
+  },
+  contactStatus: {
+    LEAD: "Lead",
+    ACTIVE: "Actief",
+    WON: "Gewonnen",
+    COMPLETED: "Voltooid",
+    INACTIVE: "Inactief",
+    LOST: "Verloren",
   },
   status: {
     job: {
