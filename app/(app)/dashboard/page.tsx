@@ -6,10 +6,10 @@ import {
   Trophy,
   CheckCircle2,
   Star,
-  ListChecks,
   AlertTriangle,
   Plus,
   UserX,
+  CalendarClock,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
@@ -20,7 +20,6 @@ import { FollowUpCard } from "@/components/followups/followup-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { formatDate } from "@/lib/utils";
 import { inactiveWhereClause } from "@/lib/contact-status";
 
 export default async function DashboardPage() {
@@ -29,8 +28,7 @@ export default async function DashboardPage() {
   const d = t.dashboard;
   const now = new Date();
 
-  const [counts, todayTasks, overdueTasks, recentContacts] = await Promise.all([
-    // KPIs
+  const [counts, attentionTasks, upcomingTasks] = await Promise.all([
     prisma.$transaction([
       prisma.contact.count({ where: { userId: user.id } }),
       prisma.job.count({ where: { userId: user.id, status: "QUOTED" } }),
@@ -41,40 +39,40 @@ export default async function DashboardPage() {
       }),
       prisma.contact.count({ where: inactiveWhereClause(user.id, now) }),
     ]),
+    // Overdue + today combined: overdue first (oldest), then today (earliest)
     prisma.followUpTask.findMany({
       where: {
         userId: user.id,
         status: "PENDING",
-        dueDate: { gte: startOfDay(now), lte: endOfDay(now) },
+        dueDate: { lte: endOfDay(now) },
       },
       include: {
         contact: { select: { id: true, fullName: true, email: true } },
         job: { select: { id: true, title: true } },
       },
       orderBy: { dueDate: "asc" },
-      take: 10,
+      take: 20,
     }),
+    // Next pending tasks after today
     prisma.followUpTask.findMany({
       where: {
         userId: user.id,
         status: "PENDING",
-        dueDate: { lt: startOfDay(now) },
+        dueDate: { gt: endOfDay(now) },
       },
       include: {
         contact: { select: { id: true, fullName: true, email: true } },
         job: { select: { id: true, title: true } },
       },
       orderBy: { dueDate: "asc" },
-      take: 10,
-    }),
-    prisma.contact.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: "desc" },
       take: 5,
     }),
   ]);
 
   const [totalContacts, quoted, won, completed, reviewRequested, inactiveCount] = counts;
+  const overdueCount = attentionTasks.filter(
+    (t) => t.dueDate < startOfDay(now)
+  ).length;
 
   return (
     <div className="space-y-6">
@@ -103,113 +101,60 @@ export default async function DashboardPage() {
         <KPIStatCard label={d.inactive} value={inactiveCount} icon={UserX} tone="destructive" href="/contacts?status=INACTIVE" />
       </div>
 
-      {/* Today + overdue */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="flex items-center gap-2">
-              <ListChecks className="h-4 w-4" />
-              {d.dueToday}
-              <span className="text-xs font-normal text-muted-foreground">
-                ({todayTasks.length})
-              </span>
-            </CardTitle>
-            <Link
-              href="/followups"
-              className="text-xs text-primary hover:underline"
-            >
-              {d.viewAll}
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {todayTasks.length === 0 ? (
-              <EmptyState
-                title={d.nothingDueTitle}
-                description={d.nothingDueDesc}
-              />
-            ) : (
-              todayTasks.map((t) => <FollowUpCard key={t.id} task={t} />)
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-destructive" />
-              {d.overdue}
-              <span className="text-xs font-normal text-muted-foreground">
-                ({overdueTasks.length})
-              </span>
-            </CardTitle>
-            <Link
-              href="/followups?filter=overdue"
-              className="text-xs text-primary hover:underline"
-            >
-              {d.openAll}
-            </Link>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {overdueTasks.length === 0 ? (
-              <EmptyState
-                title={d.noOverdueTitle}
-                description={d.noOverdueDesc}
-              />
-            ) : (
-              overdueTasks.map((t) => <FollowUpCard key={t.id} task={t} />)
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent contacts */}
+      {/* Needs attention: overdue + today */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <CardTitle>{d.recentContacts}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            {d.needsAttention}
+            <span className="text-xs font-normal text-muted-foreground">
+              ({attentionTasks.length}{overdueCount > 0 ? ` · ${overdueCount} ${d.overdue.toLowerCase()}` : ""})
+            </span>
+          </CardTitle>
           <Link
-            href="/contacts"
+            href="/followups"
             className="text-xs text-primary hover:underline"
           >
             {d.viewAll}
           </Link>
         </CardHeader>
-        <CardContent>
-          {recentContacts.length === 0 ? (
+        <CardContent className="space-y-3">
+          {attentionTasks.length === 0 ? (
             <EmptyState
-              title={d.noContactsTitle}
-              description={d.noContactsDesc}
-              action={
-                <Link
-                  href="/contacts/new"
-                  className={buttonVariants({ size: "sm" })}
-                >
-                  <Plus className="h-4 w-4" />
-                  {d.addContact}
-                </Link>
-              }
+              title={d.nothingNeedsAttentionTitle}
+              description={d.nothingNeedsAttentionDesc}
             />
           ) : (
-            <ul className="divide-y">
-              {recentContacts.map((c) => (
-                <li key={c.id} className="flex items-center justify-between py-3">
-                  <div>
-                    <Link
-                      href={`/contacts/${c.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {c.fullName}
-                    </Link>
-                    <p className="text-xs text-muted-foreground">
-                      {c.serviceType || "—"}
-                      {c.email ? ` · ${c.email}` : ""}
-                    </p>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(c.createdAt)}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            attentionTasks.map((t) => <FollowUpCard key={t.id} task={t} />)
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Upcoming */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="flex items-center gap-2">
+            <CalendarClock className="h-4 w-4" />
+            {d.upcoming}
+            <span className="text-xs font-normal text-muted-foreground">
+              ({upcomingTasks.length})
+            </span>
+          </CardTitle>
+          <Link
+            href="/followups?filter=upcoming"
+            className="text-xs text-primary hover:underline"
+          >
+            {d.viewAll}
+          </Link>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {upcomingTasks.length === 0 ? (
+            <EmptyState
+              title={d.upcomingEmptyTitle}
+              description={d.upcomingEmptyDesc}
+            />
+          ) : (
+            upcomingTasks.map((t) => <FollowUpCard key={t.id} task={t} />)
           )}
         </CardContent>
       </Card>

@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { startOfDay, endOfDay } from "date-fns";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Sidebar } from "@/components/app/sidebar";
@@ -17,10 +18,21 @@ export default async function AppLayout({
   const user = session?.user as { id?: string; email?: string } | undefined;
   if (!user?.id) redirect("/login");
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { onboardingCompleted: true, subscription: { select: { plan: true } } },
-  });
+  const now = new Date();
+
+  const [dbUser, overdueCount, todayCount] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: user.id },
+      select: { onboardingCompleted: true, subscription: { select: { plan: true } } },
+    }),
+    prisma.followUpTask.count({
+      where: { userId: user.id, status: "PENDING", dueDate: { lt: startOfDay(now) } },
+    }),
+    prisma.followUpTask.count({
+      where: { userId: user.id, status: "PENDING", dueDate: { gte: startOfDay(now), lte: endOfDay(now) } },
+    }),
+  ]);
+
   const plan = dbUser?.subscription?.plan ?? "FREE";
 
   const headersList = await headers();
@@ -32,7 +44,7 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <Sidebar overdueCount={overdueCount} todayCount={todayCount} />
       <div className="flex flex-1 flex-col">
         <Topbar email={user.email ?? ""} />
         <UpgradeBanner plan={plan} />
