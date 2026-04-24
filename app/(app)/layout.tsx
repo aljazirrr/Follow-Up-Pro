@@ -6,7 +6,7 @@ import { Sidebar } from "@/components/app/sidebar";
 import { Topbar } from "@/components/app/topbar";
 import { UpgradeBanner } from "@/components/app/upgrade-banner";
 
-const SKIP_ONBOARDING_REDIRECT = ["/onboarding", "/settings", "/billing"];
+const SKIP_ONBOARDING_REDIRECT = ["/settings", "/billing"];
 
 export default async function AppLayout({
   children,

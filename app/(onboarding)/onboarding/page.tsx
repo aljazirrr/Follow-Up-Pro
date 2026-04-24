@@ -16,7 +16,7 @@ export default async function OnboardingPage() {
   const t = getDictionary(getLocale()).onboarding;
 
   return (
-    <div className="mx-auto max-w-2xl py-12">
+    <div className="py-12">
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold">{t.title}</h1>
         <p className="mt-2 text-muted-foreground">{t.desc}</p>

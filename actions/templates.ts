@@ -6,8 +6,20 @@ import { requireUser } from "@/lib/auth";
 import { templateSchema } from "@/lib/validators";
 import { assertCanCustomizeTemplates, PlanLimitError } from "@/lib/plan-limits";
 import { DEFAULT_TEMPLATES } from "@/emails/defaults";
+import { INDUSTRY_DEFAULTS } from "@/lib/industry-defaults";
 
 type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
+
+async function getDefaultTemplates(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { industry: true },
+  });
+  if (user?.industry && INDUSTRY_DEFAULTS[user.industry]) {
+    return INDUSTRY_DEFAULTS[user.industry].templates;
+  }
+  return DEFAULT_TEMPLATES;
+}
 
 export async function upsertTemplate(formData: FormData): Promise<ActionResult> {
   const user = await requireUser();
@@ -21,8 +33,8 @@ export async function upsertTemplate(formData: FormData): Promise<ActionResult> 
     where: { userId_type: { userId: user.id, type: data.type } },
   });
 
-  // Count how many templates will be customized (non-default) after this upsert.
-  const defaultBody = DEFAULT_TEMPLATES.find((d) => d.type === data.type);
+  const defaults = await getDefaultTemplates(user.id);
+  const defaultBody = defaults.find((d) => d.type === data.type);
   const willBeCustom =
     !defaultBody ||
     defaultBody.subject !== data.subject ||
@@ -70,7 +82,8 @@ export async function upsertTemplate(formData: FormData): Promise<ActionResult> 
 
 export async function resetTemplate(type: string): Promise<ActionResult> {
   const user = await requireUser();
-  const def = DEFAULT_TEMPLATES.find((d) => d.type === type);
+  const defaults = await getDefaultTemplates(user.id);
+  const def = defaults.find((d) => d.type === type);
   if (!def) return { ok: false, error: "Unknown template type" };
 
   await prisma.messageTemplate.upsert({
