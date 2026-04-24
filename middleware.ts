@@ -46,6 +46,7 @@ export const config = {
     "/templates/:path*",
     "/billing/:path*",
     "/settings/:path*",
+    "/onboarding",
     "/onboarding/:path*",
   ],
 };
