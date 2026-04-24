@@ -309,14 +309,49 @@ const en = {
       "Priority support",
     ],
   },
+  onboarding: {
+    title: "What type of business do you run?",
+    desc: "We'll set up your workflow with the right defaults for your industry.",
+    continue: "Continue",
+    applying: "Setting up…",
+    success: "Your workspace is ready!",
+    industries: {
+      INSTALLER: {
+        label: "Installer",
+        desc: "HVAC, solar, windows, kitchens, or other installations.",
+      },
+      DETAILER: {
+        label: "Auto detailer",
+        desc: "Mobile or shop-based vehicle detailing and protection.",
+      },
+      SALON: {
+        label: "Salon & beauty",
+        desc: "Hair, nails, barbershop, or beauty treatments.",
+      },
+      REPAIR: {
+        label: "Repair & service",
+        desc: "Plumbing, electrical, appliance repair, or handyman.",
+      },
+      OTHER: {
+        label: "Other",
+        desc: "General service business or something else.",
+      },
+    },
+  },
   settings: {
     title: "Settings",
     desc: "Your account details.",
     account: "Account",
     email: "Email",
     ownerName: "Owner name",
+    businessType: "Business type",
     memberSince: "Member since",
-    editNote: "Account editing coming soon. For now, data is managed in the database.",
+    automation: "Automation timing",
+    quoteFollowUpDays: "Quote follow-up delay",
+    reviewRequestDays: "Review request delay",
+    day: "day",
+    days: "days",
+    automationNote: "These values are set based on your business type and control when follow-up tasks are auto-created.",
   },
   privacy: {
     title: "Privacy Policy",
@@ -720,14 +755,49 @@ const nl: typeof en = {
       "Prioriteitsondersteuning",
     ],
   },
+  onboarding: {
+    title: "Wat voor bedrijf heb je?",
+    desc: "We stellen je workflow in met de juiste standaardinstellingen voor jouw branche.",
+    continue: "Doorgaan",
+    applying: "Instellen…",
+    success: "Je werkruimte is klaar!",
+    industries: {
+      INSTALLER: {
+        label: "Installateur",
+        desc: "CV, zonnepanelen, ramen, keukens of andere installaties.",
+      },
+      DETAILER: {
+        label: "Autodetailer",
+        desc: "Mobiele of werkplaats-detailing en bescherming.",
+      },
+      SALON: {
+        label: "Salon & beauty",
+        desc: "Kapper, nagels, barbershop of schoonheidsbehandelingen.",
+      },
+      REPAIR: {
+        label: "Reparatie & service",
+        desc: "Loodgieter, elektricien, apparaatreparatie of klusjesman.",
+      },
+      OTHER: {
+        label: "Anders",
+        desc: "Algemeen servicebedrijf of iets anders.",
+      },
+    },
+  },
   settings: {
     title: "Instellingen",
     desc: "Je accountgegevens.",
     account: "Account",
     email: "E-mail",
     ownerName: "Eigenaarsnaam",
+    businessType: "Bedrijfstype",
     memberSince: "Lid sinds",
-    editNote: "Account bewerken komt binnenkort. Gegevens worden nu in de database beheerd.",
+    automation: "Automatiseringstiming",
+    quoteFollowUpDays: "Offerte-opvolgvertraging",
+    reviewRequestDays: "Reviewverzoekvertraging",
+    day: "dag",
+    days: "dagen",
+    automationNote: "Deze waarden zijn ingesteld op basis van je bedrijfstype en bepalen wanneer opvolgingstaken automatisch worden aangemaakt.",
   },
   privacy: {
     title: "Privacyverklaring",

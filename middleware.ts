@@ -1,11 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-/**
- * Edge-safe middleware: redirects unauthenticated users to /login based on
- * cookie presence. The actual session verification runs in the app layout
- * via `requireUser()` in a node runtime, which is the real source of truth.
- */
-
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/contacts",
@@ -14,6 +8,7 @@ const PROTECTED_PREFIXES = [
   "/templates",
   "/billing",
   "/settings",
+  "/onboarding",
 ];
 
 const SESSION_COOKIE_NAMES = [
@@ -36,7 +31,10 @@ export function middleware(req: NextRequest) {
     url.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(url);
   }
-  return NextResponse.next();
+
+  const res = NextResponse.next();
+  res.headers.set("x-pathname", pathname);
+  return res;
 }
 
 export const config = {
@@ -48,5 +46,6 @@ export const config = {
     "/templates/:path*",
     "/billing/:path*",
     "/settings/:path*",
+    "/onboarding/:path*",
   ],
 };
