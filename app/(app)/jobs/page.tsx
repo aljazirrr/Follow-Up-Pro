@@ -29,9 +29,10 @@ export default async function JobsPage({
   const now = new Date();
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { quoteFollowUpDays: true },
+    select: { quoteFollowUpDays: true, firstContactCreatedAt: true },
   });
   const quoteFollowUpDays = dbUser?.quoteFollowUpDays ?? 2;
+  const firstContactCreatedAt = dbUser?.firstContactCreatedAt ?? null;
 
   const where: Prisma.JobWhereInput = { userId: user.id };
   if (params.status && Object.values(JobStatus).includes(params.status as JobStatus)) {
@@ -81,10 +82,32 @@ export default async function JobsPage({
           )}
 
           {jobs.length === 0 ? (
-            <EmptyState
-              title={j.noJobsTitle}
-              description={j.noJobsDesc}
-            />
+            params.status ? (
+              <EmptyState
+                title={j.noJobsFilterTitle}
+                description={j.noJobsFilterDesc}
+              />
+            ) : firstContactCreatedAt === null ? (
+              <EmptyState
+                title={j.noJobsTitle}
+                description={j.noJobsNoContactDesc}
+                action={
+                  <Link href="/contacts/new" className={buttonVariants({ size: "sm" })}>
+                    {j.addContact}
+                  </Link>
+                }
+              />
+            ) : (
+              <EmptyState
+                title={j.noJobsTitle}
+                description={j.noJobsHasContactDesc}
+                action={
+                  <Link href="/contacts" className={buttonVariants({ variant: "outline", size: "sm" })}>
+                    {j.goToContacts}
+                  </Link>
+                }
+              />
+            )
           ) : (
             <Table>
               <THead>

@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FollowUpCard } from "@/components/followups/followup-card";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Prisma } from "@prisma/client";
 
@@ -54,6 +55,12 @@ export default async function FollowUpsPage({
       break;
   }
 
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { firstJobCreatedAt: true },
+  });
+  const firstJobCreatedAt = dbUser?.firstJobCreatedAt ?? null;
+
   const tasks = await prisma.followUpTask.findMany({
     where,
     include: {
@@ -91,18 +98,37 @@ export default async function FollowUpsPage({
       <Card>
         <CardContent className="space-y-3 pt-6">
           {tasks.length === 0 ? (
-            <EmptyState
-              title={f.nothingTitle}
-              description={
-                filter === "today"
-                  ? f.todayEmpty
-                  : filter === "overdue"
-                    ? f.overdueEmpty
-                    : filter === "upcoming"
-                      ? f.upcomingEmpty
-                      : f.allEmpty
-              }
-            />
+            filter === "all" ? (
+              firstJobCreatedAt === null ? (
+                <EmptyState
+                  title={f.nothingTitle}
+                  description={f.allNoJobsDesc}
+                  action={
+                    <Link href="/jobs" className={buttonVariants({ size: "sm" })}>
+                      {f.goToJobs}
+                    </Link>
+                  }
+                />
+              ) : (
+                <EmptyState
+                  title={f.nothingTitle}
+                  description={f.allDoneDesc}
+                />
+              )
+            ) : (
+              <EmptyState
+                title={f.nothingTitle}
+                description={
+                  filter === "today"
+                    ? f.todayEmpty
+                    : filter === "overdue"
+                      ? f.overdueEmpty
+                      : filter === "upcoming"
+                        ? f.upcomingEmpty
+                        : f.allEmpty
+                }
+              />
+            )
           ) : (
             tasks.map((t) => <FollowUpCard key={t.id} task={t} />)
           )}
