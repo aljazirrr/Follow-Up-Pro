@@ -35,6 +35,23 @@ export function deriveContactStatusFromJobs(jobStatuses: JobStatus[]): ContactSt
   return ContactStatus.LOST;
 }
 
+export async function recalculateContactStatus(
+  tx: Tx,
+  contactId: string,
+  extra?: Partial<{ lastContactedAt: Date }>
+): Promise<ContactStatus> {
+  const jobs = await tx.job.findMany({
+    where: { contactId },
+    select: { status: true },
+  });
+  const newStatus = deriveContactStatusFromJobs(jobs.map((j) => j.status));
+  await tx.contact.update({
+    where: { id: contactId },
+    data: { status: newStatus, ...extra },
+  });
+  return newStatus;
+}
+
 export async function onJobStatusChange(
   tx: Tx,
   job: Job,
@@ -139,20 +156,7 @@ export async function onJobStatusChange(
     }
   }
 
-  // Derive contact status from all current jobs for this contact
-  const allJobs = await tx.job.findMany({
-    where: { contactId: job.contactId },
-    select: { status: true },
-  });
-  const newContactStatus = deriveContactStatusFromJobs(allJobs.map((j) => j.status));
-  await tx.contact.update({
-    where: { id: job.contactId },
-    data: {
-      status: newContactStatus,
-      lastContactedAt: now,
-    },
-  });
-
+  const newContactStatus = await recalculateContactStatus(tx, job.contactId, { lastContactedAt: now });
   log("contact_status_updated", { contactId: job.contactId, status: newContactStatus });
 
   return updated;

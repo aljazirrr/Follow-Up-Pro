@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { jobSchema, jobStatusSchema } from "@/lib/validators";
-import { onJobStatusChange } from "@/lib/automation";
+import { onJobStatusChange, recalculateContactStatus } from "@/lib/automation";
 import { assertCanCreateTask, PlanLimitError } from "@/lib/plan-limits";
 import { staleQuoteWhereClause } from "@/lib/stale-quotes";
 import type { JobStatus } from "@prisma/client";
@@ -27,6 +27,7 @@ export async function createJob(formData: FormData): Promise<ActionResult> {
   if (!contact) return { ok: false, error: "Contact not found" };
 
   const initialStatus = data.status;
+  const now = new Date();
 
   const job = await prisma.$transaction(async (tx) => {
     const created = await tx.job.create({
@@ -43,6 +44,7 @@ export async function createJob(formData: FormData): Promise<ActionResult> {
     if (initialStatus && initialStatus !== "NEW") {
       return onJobStatusChange(tx, created, initialStatus);
     }
+    await recalculateContactStatus(tx, data.contactId, { lastContactedAt: now });
     return created;
   });
 
@@ -154,7 +156,11 @@ export async function deleteJob(id: string): Promise<ActionResult> {
   });
   if (!existing) return { ok: false, error: "Job not found" };
 
-  await prisma.job.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    await tx.job.delete({ where: { id } });
+    await recalculateContactStatus(tx, existing.contactId);
+  });
+
   revalidatePath("/jobs");
   revalidatePath("/followups");
   revalidatePath("/dashboard");
