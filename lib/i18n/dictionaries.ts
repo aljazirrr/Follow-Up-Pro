@@ -214,6 +214,13 @@ const en = {
     nextAction: "Next action",
     reactivate: "Reactivate",
     reactivated: "Contact reactivated",
+    jobEvents: {
+      created: "Job created",
+      quoted: "Quote sent",
+      won: "Job won",
+      completed: "Job completed",
+      lost: "Job lost",
+    },
   },
   jobs: {
     title: "Jobs",
@@ -689,6 +696,13 @@ const nl: typeof en = {
     nextAction: "Volgende actie",
     reactivate: "Reactiveren",
     reactivated: "Contact gereactiveerd",
+    jobEvents: {
+      created: "Opdracht aangemaakt",
+      quoted: "Offerte verstuurd",
+      won: "Opdracht gewonnen",
+      completed: "Opdracht voltooid",
+      lost: "Opdracht verloren",
+    },
   },
   jobs: {
     title: "Opdrachten",
