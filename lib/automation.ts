@@ -27,21 +27,12 @@ type Tx = Omit<
 
 const DAY = 86400000;
 
-function deriveContactStatus(jobStatus: JobStatus): ContactStatus {
-  switch (jobStatus) {
-    case "NEW":
-    case "QUOTED":
-      return ContactStatus.ACTIVE;
-    case "WON":
-      return ContactStatus.WON;
-    case "COMPLETED":
-    case "REVIEW_REQUESTED":
-      return ContactStatus.COMPLETED;
-    case "LOST":
-      return ContactStatus.LOST;
-    default:
-      return ContactStatus.ACTIVE;
-  }
+export function deriveContactStatusFromJobs(jobStatuses: JobStatus[]): ContactStatus {
+  if (jobStatuses.length === 0) return ContactStatus.LEAD;
+  if (jobStatuses.some((s) => s === "WON")) return ContactStatus.WON;
+  if (jobStatuses.some((s) => s === "NEW" || s === "QUOTED")) return ContactStatus.ACTIVE;
+  if (jobStatuses.some((s) => s === "COMPLETED" || s === "REVIEW_REQUESTED")) return ContactStatus.COMPLETED;
+  return ContactStatus.LOST;
 }
 
 export async function onJobStatusChange(
@@ -148,8 +139,12 @@ export async function onJobStatusChange(
     }
   }
 
-  // Derive and persist contact lifecycle state
-  const newContactStatus = deriveContactStatus(newStatus);
+  // Derive contact status from all current jobs for this contact
+  const allJobs = await tx.job.findMany({
+    where: { contactId: job.contactId },
+    select: { status: true },
+  });
+  const newContactStatus = deriveContactStatusFromJobs(allJobs.map((j) => j.status));
   await tx.contact.update({
     where: { id: job.contactId },
     data: {
