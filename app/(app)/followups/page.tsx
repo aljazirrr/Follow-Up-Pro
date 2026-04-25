@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FollowUpCard } from "@/components/followups/followup-card";
+import { SkipOverdueButton } from "@/components/followups/skip-overdue-button";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Prisma } from "@prisma/client";
@@ -61,15 +62,26 @@ export default async function FollowUpsPage({
   });
   const firstJobCreatedAt = dbUser?.firstJobCreatedAt ?? null;
 
-  const tasks = await prisma.followUpTask.findMany({
-    where,
-    include: {
-      contact: { select: { id: true, fullName: true, email: true } },
-      job: { select: { id: true, title: true } },
-    },
-    orderBy: { dueDate: filter === "done" ? "desc" : "asc" },
-    take: 100,
-  });
+  const [tasks, overdueCount] = await Promise.all([
+    prisma.followUpTask.findMany({
+      where,
+      include: {
+        contact: { select: { id: true, fullName: true, email: true } },
+        job: { select: { id: true, title: true } },
+      },
+      orderBy: { dueDate: filter === "done" ? "desc" : "asc" },
+      take: 100,
+    }),
+    filter === "overdue"
+      ? prisma.followUpTask.count({
+          where: {
+            userId: user.id,
+            status: "PENDING",
+            dueDate: { lt: startOfDay(now) },
+          },
+        })
+      : Promise.resolve(0),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -97,6 +109,11 @@ export default async function FollowUpsPage({
 
       <Card>
         <CardContent className="space-y-3 pt-6">
+          {filter === "overdue" && overdueCount > 0 && (
+            <div className="mb-1">
+              <SkipOverdueButton count={overdueCount} />
+            </div>
+          )}
           {tasks.length === 0 ? (
             filter === "all" ? (
               firstJobCreatedAt === null ? (

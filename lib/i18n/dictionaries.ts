@@ -295,6 +295,9 @@ const en = {
     markedDone: "Marked done",
     skipped: "Skipped",
     due: "Due",
+    skipOverdue: "Skip {count} overdue tasks",
+    skipOverdueConfirm: "Skip {count} overdue task(s)? They will be marked as skipped.",
+    skipOverdueSuccess: "Skipped {count} overdue task(s)",
   },
   templates: {
     title: "Email templates",
@@ -777,6 +780,9 @@ const nl: typeof en = {
     markedDone: "Gemarkeerd als gedaan",
     skipped: "Overgeslagen",
     due: "Te doen",
+    skipOverdue: "{count} achterstallige taken overslaan",
+    skipOverdueConfirm: "{count} achterstallige taak/taken overslaan? Ze worden gemarkeerd als overgeslagen.",
+    skipOverdueSuccess: "{count} achterstallige taak/taken overgeslagen",
   },
   templates: {
     title: "E-mailsjablonen",

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { startOfDay } from "date-fns";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { taskSchema, taskStatusSchema, sendEmailSchema } from "@/lib/validators";
@@ -154,4 +155,27 @@ export async function sendTaskEmail(formData: FormData): Promise<ActionResult> {
   revalidatePath("/dashboard");
   revalidatePath(`/contacts/${task.contactId}`);
   return { ok: true, id: taskId };
+}
+
+export async function skipAllOverdueTasks(): Promise<{ ok: true; count: number } | { ok: false; error: string }> {
+  const user = await requireUser();
+  const now = new Date();
+
+  const result = await prisma.followUpTask.updateMany({
+    where: {
+      userId: user.id,
+      status: TaskStatus.PENDING,
+      dueDate: { lt: startOfDay(now) },
+    },
+    data: {
+      status: TaskStatus.SKIPPED,
+      completedAt: now,
+    },
+  });
+
+  log("followups", "overdue_tasks_skipped", { userId: user.id, count: result.count });
+
+  revalidatePath("/followups");
+  revalidatePath("/dashboard");
+  return { ok: true, count: result.count };
 }
