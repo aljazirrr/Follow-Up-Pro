@@ -10,6 +10,7 @@ import {
   Plus,
   UserX,
   CalendarClock,
+  Clock,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
@@ -21,12 +22,19 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { inactiveWhereClause } from "@/lib/contact-status";
+import { staleQuoteWhereClause } from "@/lib/stale-quotes";
 
 export default async function DashboardPage() {
   const user = await requireUser();
   const t = getDictionary(getLocale());
   const d = t.dashboard;
   const now = new Date();
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { quoteFollowUpDays: true },
+  });
+  const quoteFollowUpDays = dbUser?.quoteFollowUpDays ?? 2;
 
   const [counts, attentionTasks, upcomingTasks] = await Promise.all([
     prisma.$transaction([
@@ -38,6 +46,7 @@ export default async function DashboardPage() {
         where: { userId: user.id, type: "REVIEW_REQUEST" },
       }),
       prisma.contact.count({ where: inactiveWhereClause(user.id, now) }),
+      prisma.job.count({ where: staleQuoteWhereClause(user.id, quoteFollowUpDays, now) }),
     ]),
     // Overdue + today combined: overdue first (oldest), then today (earliest)
     prisma.followUpTask.findMany({
@@ -69,7 +78,7 @@ export default async function DashboardPage() {
     }),
   ]);
 
-  const [totalContacts, quoted, won, completed, reviewRequested, inactiveCount] = counts;
+  const [totalContacts, quoted, won, completed, reviewRequested, inactiveCount, staleQuoteCount] = counts;
   const overdueCount = attentionTasks.filter(
     (t) => t.dueDate < startOfDay(now)
   ).length;
@@ -92,9 +101,10 @@ export default async function DashboardPage() {
       />
 
       {/* KPIs */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
         <KPIStatCard label={d.totalLeads} value={totalContacts} icon={Users} />
         <KPIStatCard label={d.quoted} value={quoted} icon={FileText} tone="warning" />
+        <KPIStatCard label={d.staleQuotes} value={staleQuoteCount} icon={Clock} tone="destructive" href="/jobs?status=QUOTED" />
         <KPIStatCard label={d.won} value={won} icon={Trophy} tone="success" />
         <KPIStatCard label={d.completed} value={completed} icon={CheckCircle2} tone="success" />
         <KPIStatCard label={d.reviewRequested} value={reviewRequested} icon={Star} />

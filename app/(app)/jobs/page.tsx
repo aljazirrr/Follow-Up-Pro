@@ -10,7 +10,8 @@ import { Table, THead, TBody, TR, TH, TD } from "@/components/ui/table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { JobStatusBadge } from "@/components/shared/status-badge";
 import { JobStatusSelect } from "@/components/jobs/job-status-select";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { cn, formatCurrency, formatDate } from "@/lib/utils";
+import { isStaleQuote } from "@/lib/stale-quotes";
 import { JobStatus, Prisma } from "@prisma/client";
 
 export default async function JobsPage({
@@ -22,6 +23,13 @@ export default async function JobsPage({
   const user = await requireUser();
   const t = getDictionary(getLocale());
   const j = t.jobs;
+
+  const now = new Date();
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { quoteFollowUpDays: true },
+  });
+  const quoteFollowUpDays = dbUser?.quoteFollowUpDays ?? 2;
 
   const where: Prisma.JobWhereInput = { userId: user.id };
   if (params.status && Object.values(JobStatus).includes(params.status as JobStatus)) {
@@ -74,6 +82,7 @@ export default async function JobsPage({
                   <TH>{j.colValue}</TH>
                   <TH>{j.colStatus}</TH>
                   <TH>{j.colChangeStatus}</TH>
+                  <TH>{j.colDaysQuoted}</TH>
                   <TH>{j.colCreated}</TH>
                 </TR>
               </THead>
@@ -95,6 +104,17 @@ export default async function JobsPage({
                     </TD>
                     <TD>
                       <JobStatusSelect jobId={job.id} status={job.status} />
+                    </TD>
+                    <TD className="text-sm">
+                      {job.status === "QUOTED" && job.quoteSentAt ? (() => {
+                        const days = Math.floor((now.getTime() - new Date(job.quoteSentAt).getTime()) / 86400000);
+                        const stale = isStaleQuote(job.quoteSentAt, quoteFollowUpDays, now);
+                        return (
+                          <span className={cn(stale && "font-medium text-destructive")}>
+                            {days}{j.daysAbbrev}
+                          </span>
+                        );
+                      })() : null}
                     </TD>
                     <TD className="text-sm text-muted-foreground">
                       {formatDate(job.createdAt)}

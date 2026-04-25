@@ -142,6 +142,7 @@ const en = {
     upcoming: "Upcoming",
     upcomingEmptyTitle: "No upcoming tasks",
     upcomingEmptyDesc: "New follow-ups will appear here when jobs move through your pipeline.",
+    staleQuotes: "Stale quotes",
   },
   contacts: {
     title: "Contacts",
@@ -213,6 +214,8 @@ const en = {
     colStatus: "Status",
     colChangeStatus: "Change status",
     colCreated: "Created",
+    colDaysQuoted: "Days quoted",
+    daysAbbrev: "d",
     newJob: "+ New job",
     titleLabel: "Title *",
     titlePlaceholder: "e.g. Kitchen sink repair",
@@ -584,6 +587,7 @@ const nl: typeof en = {
     upcoming: "Aankomend",
     upcomingEmptyTitle: "Geen aankomende taken",
     upcomingEmptyDesc: "Nieuwe opvolgingen verschijnen hier wanneer opdrachten door je pipeline gaan.",
+    staleQuotes: "Verlopen offertes",
   },
   contacts: {
     title: "Contacten",
@@ -655,6 +659,8 @@ const nl: typeof en = {
     colStatus: "Status",
     colChangeStatus: "Status wijzigen",
     colCreated: "Aangemaakt",
+    colDaysQuoted: "Dagen geoffreerd",
+    daysAbbrev: "d",
     newJob: "+ Nieuwe opdracht",
     titleLabel: "Titel *",
     titlePlaceholder: "bijv. Keukenafvoer reparatie",
