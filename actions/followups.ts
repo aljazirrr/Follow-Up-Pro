@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { startOfDay } from "date-fns";
+import { endOfDay, startOfDay } from "date-fns";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { taskSchema, taskStatusSchema, sendEmailSchema } from "@/lib/validators";
@@ -174,6 +174,34 @@ export async function skipAllOverdueTasks(): Promise<{ ok: true; count: number }
   });
 
   log("followups", "overdue_tasks_skipped", { userId: user.id, count: result.count });
+
+  revalidatePath("/followups");
+  revalidatePath("/dashboard");
+  return { ok: true, count: result.count };
+}
+
+export async function markAllManualTodayDone(): Promise<{ ok: true; count: number } | { ok: false; error: string }> {
+  const user = await requireUser();
+  const now = new Date();
+
+  const result = await prisma.followUpTask.updateMany({
+    where: {
+      userId: user.id,
+      status: TaskStatus.PENDING,
+      channel: Channel.MANUAL,
+      dueDate: { gte: startOfDay(now), lte: endOfDay(now) },
+    },
+    data: {
+      status: TaskStatus.DONE,
+      completedAt: now,
+    },
+  });
+
+  if (result.count > 0) {
+    await setMilestoneOnce(user.id, "firstTaskCompletedAt", now).catch(() => {});
+  }
+
+  log("followups", "manual_today_tasks_done", { userId: user.id, count: result.count });
 
   revalidatePath("/followups");
   revalidatePath("/dashboard");

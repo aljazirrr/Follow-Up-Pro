@@ -300,6 +300,10 @@ const en = {
     skipOverdueSuccess: "Skipped {count} overdue task(s)",
     groupEmail: "Email tasks",
     groupManual: "Manual tasks",
+    markManualDone: "Mark {count} manual tasks done",
+    markManualDoneConfirm: "Mark {count} manual task(s) as done? This confirms you completed them outside the app.",
+    markManualDoneSuccess: "Marked {count} manual task(s) done",
+    markManualDoneNoop: "No manual tasks were updated",
   },
   templates: {
     title: "Email templates",
@@ -787,6 +791,10 @@ const nl: typeof en = {
     skipOverdueSuccess: "{count} achterstallige taak/taken overgeslagen",
     groupEmail: "E-mailtaken",
     groupManual: "Handmatige taken",
+    markManualDone: "{count} handmatige taken als gedaan markeren",
+    markManualDoneConfirm: "{count} handmatige taak/taken als gedaan markeren? Dit bevestigt dat je ze buiten de app hebt afgerond.",
+    markManualDoneSuccess: "{count} handmatige taak/taken als gedaan gemarkeerd",
+    markManualDoneNoop: "Geen handmatige taken bijgewerkt",
   },
   templates: {
     title: "E-mailsjablonen",

@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FollowUpCard } from "@/components/followups/followup-card";
 import { SkipOverdueButton } from "@/components/followups/skip-overdue-button";
+import { MarkManualDoneButton } from "@/components/followups/mark-manual-done-button";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Prisma } from "@prisma/client";
@@ -62,7 +63,7 @@ export default async function FollowUpsPage({
   });
   const firstJobCreatedAt = dbUser?.firstJobCreatedAt ?? null;
 
-  const [tasks, overdueCount] = await Promise.all([
+  const [tasks, overdueCount, manualTodayCount] = await Promise.all([
     prisma.followUpTask.findMany({
       where,
       include: {
@@ -78,6 +79,16 @@ export default async function FollowUpsPage({
             userId: user.id,
             status: "PENDING",
             dueDate: { lt: startOfDay(now) },
+          },
+        })
+      : Promise.resolve(0),
+    filter === "today"
+      ? prisma.followUpTask.count({
+          where: {
+            userId: user.id,
+            status: "PENDING",
+            channel: "MANUAL",
+            dueDate: { gte: startOfDay(now), lte: endOfDay(now) },
           },
         })
       : Promise.resolve(0),
@@ -169,6 +180,11 @@ export default async function FollowUpsPage({
                       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                         {f.groupManual}
                       </p>
+                    )}
+                    {filter === "today" && manualTodayCount > 0 && (
+                      <div>
+                        <MarkManualDoneButton count={manualTodayCount} />
+                      </div>
                     )}
                     {manualTasks.map((t) => <FollowUpCard key={t.id} task={t} />)}
                   </>
