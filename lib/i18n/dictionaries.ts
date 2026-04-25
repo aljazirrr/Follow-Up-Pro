@@ -152,6 +152,11 @@ const en = {
       step4: "Quote your first job",
       step5: "Complete your first follow-up",
     },
+    activated: {
+      title: "You're all set up",
+      body: "Your dashboard will automatically surface due and overdue tasks as your jobs move through the pipeline. Keep adding contacts and jobs to build your rhythm.",
+      dismiss: "Got it",
+    },
   },
   contacts: {
     title: "Contacts",
@@ -621,6 +626,11 @@ const nl: typeof en = {
       step3: "Maak je eerste opdracht aan",
       step4: "Offreer je eerste opdracht",
       step5: "Rond je eerste opvolging af",
+    },
+    activated: {
+      title: "Je bent er klaar voor",
+      body: "Je dashboard toont automatisch openstaande en achterstallige taken terwijl opdrachten door je pipeline bewegen. Blijf contacten en opdrachten toevoegen om je ritme op te bouwen.",
+      dismiss: "Begrepen",
     },
   },
   contacts: {

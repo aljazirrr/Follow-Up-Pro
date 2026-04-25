@@ -22,6 +22,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { ActivationChecklist } from "@/components/shared/activation-checklist";
+import { PostActivationCard } from "@/components/shared/post-activation-card";
 import { inactiveWhereClause } from "@/lib/contact-status";
 import { staleQuoteWhereClause } from "@/lib/stale-quotes";
 
@@ -108,7 +109,7 @@ export default async function DashboardPage() {
         }
       />
 
-      {!dbUser?.firstTaskCompletedAt && (
+      {!dbUser?.firstTaskCompletedAt ? (
         <ActivationChecklist
           onboardingCompleted={dbUser?.onboardingCompleted ?? false}
           firstContactCreatedAt={dbUser?.firstContactCreatedAt ?? null}
@@ -117,6 +118,8 @@ export default async function DashboardPage() {
           firstTaskCompletedAt={dbUser?.firstTaskCompletedAt ?? null}
           t={t}
         />
+      ) : (
+        <PostActivationCard />
       )}
 
       {/* KPIs */}
