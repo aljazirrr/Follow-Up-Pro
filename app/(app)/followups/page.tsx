@@ -146,7 +146,36 @@ export default async function FollowUpsPage({
                 }
               />
             )
-          ) : (
+          ) : (filter === "today" || filter === "overdue") ? (() => {
+            const emailTasks = tasks.filter((t) => t.channel === "EMAIL");
+            const manualTasks = tasks.filter((t) => t.channel !== "EMAIL");
+            const showHeaders = emailTasks.length > 0 && manualTasks.length > 0;
+
+            return (
+              <>
+                {emailTasks.length > 0 && (
+                  <>
+                    {showHeaders && (
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {f.groupEmail}
+                      </p>
+                    )}
+                    {emailTasks.map((t) => <FollowUpCard key={t.id} task={t} />)}
+                  </>
+                )}
+                {manualTasks.length > 0 && (
+                  <>
+                    {showHeaders && (
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {f.groupManual}
+                      </p>
+                    )}
+                    {manualTasks.map((t) => <FollowUpCard key={t.id} task={t} />)}
+                  </>
+                )}
+              </>
+            );
+          })() : (
             tasks.map((t) => <FollowUpCard key={t.id} task={t} />)
           )}
         </CardContent>

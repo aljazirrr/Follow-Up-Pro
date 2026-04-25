@@ -298,6 +298,8 @@ const en = {
     skipOverdue: "Skip {count} overdue tasks",
     skipOverdueConfirm: "Skip {count} overdue task(s)? They will be marked as skipped.",
     skipOverdueSuccess: "Skipped {count} overdue task(s)",
+    groupEmail: "Email tasks",
+    groupManual: "Manual tasks",
   },
   templates: {
     title: "Email templates",
@@ -783,6 +785,8 @@ const nl: typeof en = {
     skipOverdue: "{count} achterstallige taken overslaan",
     skipOverdueConfirm: "{count} achterstallige taak/taken overslaan? Ze worden gemarkeerd als overgeslagen.",
     skipOverdueSuccess: "{count} achterstallige taak/taken overgeslagen",
+    groupEmail: "E-mailtaken",
+    groupManual: "Handmatige taken",
   },
   templates: {
     title: "E-mailsjablonen",
