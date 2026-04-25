@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { jobSchema, jobStatusSchema } from "@/lib/validators";
 import { onJobStatusChange, recalculateContactStatus } from "@/lib/automation";
+import { setMilestoneOnce } from "@/lib/activation";
 import { assertCanCreateTask, PlanLimitError } from "@/lib/plan-limits";
 import { staleQuoteWhereClause } from "@/lib/stale-quotes";
 import type { JobStatus } from "@prisma/client";
@@ -48,6 +49,8 @@ export async function createJob(formData: FormData): Promise<ActionResult> {
     return created;
   });
 
+  await setMilestoneOnce(user.id, "firstJobCreatedAt", now).catch(() => {});
+
   revalidatePath("/jobs");
   revalidatePath("/followups");
   revalidatePath("/dashboard");
@@ -73,6 +76,10 @@ export async function updateJobStatus(
   await prisma.$transaction(async (tx) => {
     await onJobStatusChange(tx, existing, status as JobStatus);
   });
+
+  if (status === "QUOTED") {
+    await setMilestoneOnce(user.id, "firstQuotedJobAt", new Date()).catch(() => {});
+  }
 
   revalidatePath("/jobs");
   revalidatePath("/followups");

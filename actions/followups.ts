@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { taskSchema, taskStatusSchema, sendEmailSchema } from "@/lib/validators";
 import { assertCanCreateTask, PlanLimitError } from "@/lib/plan-limits";
+import { setMilestoneOnce } from "@/lib/activation";
 import { sendEmail } from "@/lib/email";
 import { Channel, TaskStatus } from "@prisma/client";
 
@@ -81,6 +82,10 @@ export async function updateTaskStatus(formData: FormData): Promise<ActionResult
 
   await prisma.followUpTask.update({ where: { id: taskId }, data });
 
+  if (status === "DONE" || status === "SENT") {
+    await setMilestoneOnce(user.id, "firstTaskCompletedAt", new Date()).catch(() => {});
+  }
+
   revalidatePath("/followups");
   revalidatePath("/dashboard");
   revalidatePath(`/contacts/${existing.contactId}`);
@@ -130,6 +135,8 @@ export async function sendTaskEmail(formData: FormData): Promise<ActionResult> {
       messagePreview: subject,
     },
   });
+
+  await setMilestoneOnce(user.id, "firstTaskCompletedAt", new Date()).catch(() => {});
 
   revalidatePath("/followups");
   revalidatePath(`/followups/${taskId}`);

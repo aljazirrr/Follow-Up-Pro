@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { contactSchema } from "@/lib/validators";
 import { assertCanCreateContact, PlanLimitError } from "@/lib/plan-limits";
+import { setMilestoneOnce } from "@/lib/activation";
 
 type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
 
@@ -34,6 +35,8 @@ export async function createContact(formData: FormData): Promise<ActionResult> {
     if (err instanceof PlanLimitError) return { ok: false, error: err.message };
     throw err;
   }
+
+  await setMilestoneOnce(user.id, "firstContactCreatedAt", new Date()).catch(() => {});
 
   revalidatePath("/contacts");
   revalidatePath("/dashboard");

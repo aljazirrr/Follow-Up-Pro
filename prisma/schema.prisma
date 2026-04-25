@@ -90,6 +90,11 @@ model User {
   image                 String?
   industry              Industry?
   onboardingCompleted   Boolean   @default(false)
+  onboardingCompletedAt DateTime?
+  firstContactCreatedAt DateTime?
+  firstJobCreatedAt     DateTime?
+  firstQuotedJobAt      DateTime?
+  firstTaskCompletedAt  DateTime?
   quoteFollowUpDays     Int     @default(2)
   reviewRequestDays     Int     @default(1)
   createdAt             DateTime  @default(now())

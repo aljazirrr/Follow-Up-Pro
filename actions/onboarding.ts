@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { INDUSTRY_DEFAULTS } from "@/lib/industry-defaults";
+import { setMilestoneOnce } from "@/lib/activation";
 import type { Industry } from "@prisma/client";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
@@ -43,6 +44,8 @@ export async function completeOnboarding(industry: string): Promise<ActionResult
       })),
     });
   });
+
+  await setMilestoneOnce(user.id, "onboardingCompletedAt", new Date()).catch(() => {});
 
   revalidatePath("/dashboard");
   revalidatePath("/templates");
