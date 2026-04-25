@@ -12,6 +12,7 @@ import { JobStatusBadge } from "@/components/shared/status-badge";
 import { JobStatusSelect } from "@/components/jobs/job-status-select";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import { isStaleQuote } from "@/lib/stale-quotes";
+import { FollowUpButton } from "@/components/jobs/follow-up-button";
 import { JobStatus, Prisma } from "@prisma/client";
 
 export default async function JobsPage({
@@ -110,9 +111,12 @@ export default async function JobsPage({
                         const days = Math.floor((now.getTime() - new Date(job.quoteSentAt).getTime()) / 86400000);
                         const stale = isStaleQuote(job.quoteSentAt, quoteFollowUpDays, now);
                         return (
-                          <span className={cn(stale && "font-medium text-destructive")}>
-                            {days}{j.daysAbbrev}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={cn(stale && "font-medium text-destructive")}>
+                              {days}{j.daysAbbrev}
+                            </span>
+                            {stale && <FollowUpButton jobId={job.id} />}
+                          </div>
                         );
                       })() : null}
                     </TD>

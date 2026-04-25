@@ -228,6 +228,8 @@ const en = {
     cancel: "Cancel",
     jobCreated: "Job created",
     statusUpdated: "Status updated to",
+    followUp: "Follow up",
+    followUpCreated: "Follow-up task created",
   },
   followups: {
     title: "Follow-ups",
@@ -673,6 +675,8 @@ const nl: typeof en = {
     cancel: "Annuleren",
     jobCreated: "Opdracht aangemaakt",
     statusUpdated: "Status gewijzigd naar",
+    followUp: "Opvolgen",
+    followUpCreated: "Opvolgingstaak aangemaakt",
   },
   followups: {
     title: "Opvolgingen",
