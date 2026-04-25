@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { contactSchema } from "@/lib/validators";
 import { assertCanCreateContact, PlanLimitError } from "@/lib/plan-limits";
 import { setMilestoneOnce } from "@/lib/activation";
+import { log } from "@/lib/logger";
 
 type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
 
@@ -112,6 +113,8 @@ export async function reactivateContact(contactId: string): Promise<ActionResult
       },
     });
   });
+
+  log("contacts", "contact_reactivated", { contactId, userId: user.id });
 
   revalidatePath(`/contacts/${contactId}`);
   revalidatePath("/contacts");

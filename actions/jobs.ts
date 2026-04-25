@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { jobSchema, jobStatusSchema } from "@/lib/validators";
 import { onJobStatusChange, recalculateContactStatus } from "@/lib/automation";
 import { setMilestoneOnce } from "@/lib/activation";
+import { log } from "@/lib/logger";
 import { assertCanCreateTask, PlanLimitError } from "@/lib/plan-limits";
 import { staleQuoteWhereClause } from "@/lib/stale-quotes";
 import type { JobStatus } from "@prisma/client";
@@ -48,6 +49,8 @@ export async function createJob(formData: FormData): Promise<ActionResult> {
     await recalculateContactStatus(tx, data.contactId, { lastContactedAt: now });
     return created;
   });
+
+  log("jobs", "job_created", { jobId: job.id, contactId: data.contactId, userId: user.id, status: job.status });
 
   await setMilestoneOnce(user.id, "firstJobCreatedAt", now).catch(() => {});
 
@@ -167,6 +170,8 @@ export async function deleteJob(id: string): Promise<ActionResult> {
     await tx.job.delete({ where: { id } });
     await recalculateContactStatus(tx, existing.contactId);
   });
+
+  log("jobs", "job_deleted", { jobId: id, contactId: existing.contactId, userId: user.id });
 
   revalidatePath("/jobs");
   revalidatePath("/followups");

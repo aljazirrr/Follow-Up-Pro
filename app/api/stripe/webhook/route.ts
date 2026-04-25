@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
+import { log } from "@/lib/logger";
 import type { SubscriptionStatus } from "@prisma/client";
 
 export const runtime = "nodejs";
@@ -31,12 +32,13 @@ async function syncSubscription(sub: Stripe.Subscription) {
     where: { stripeCustomerId: customerId },
   });
   if (!existing) {
-    console.warn("[stripe webhook] No subscription row for customer", customerId);
+    log("stripe", "subscription_no_row", { customerId });
     return;
   }
 
   const status = mapStatus(sub.status);
   const isActive = status === "ACTIVE" || status === "TRIALING";
+  const plan = isActive ? "PRO" : "FREE";
 
   await prisma.subscription.update({
     where: { id: existing.id },
@@ -44,10 +46,12 @@ async function syncSubscription(sub: Stripe.Subscription) {
       stripeSubscriptionId: sub.id,
       stripePriceId: sub.items.data[0]?.price?.id ?? null,
       status,
-      plan: isActive ? "PRO" : "FREE",
+      plan,
       currentPeriodEnd: new Date(sub.current_period_end * 1000),
     },
   });
+
+  log("stripe", "subscription_updated", { customerId, subscriptionId: sub.id, status, plan });
 }
 
 export async function POST(req: NextRequest) {
@@ -98,6 +102,7 @@ export async function POST(req: NextRequest) {
           where: { stripeCustomerId: customerId },
           data: { plan: "FREE", status: "CANCELED", stripeSubscriptionId: null },
         });
+        log("stripe", "subscription_canceled", { customerId, subscriptionId: sub.id });
         break;
       }
       default:
@@ -105,7 +110,7 @@ export async function POST(req: NextRequest) {
         break;
     }
   } catch (err) {
-    console.error("[stripe webhook] handler error", err);
+    log("stripe", "handler_error", { error: err instanceof Error ? err.message : String(err) });
     return NextResponse.json({ error: "handler error" }, { status: 500 });
   }
 

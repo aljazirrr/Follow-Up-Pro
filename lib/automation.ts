@@ -16,9 +16,7 @@
 
 import type { PrismaClient, Job, JobStatus } from "@prisma/client";
 import { Channel, ContactStatus, TaskStatus, TaskType } from "@prisma/client";
-
-const log = (msg: string, meta?: Record<string, unknown>) =>
-  console.log(JSON.stringify({ ts: new Date().toISOString(), src: "automation", msg, ...meta }));
+import { log } from "@/lib/logger";
 
 type Tx = Omit<
   PrismaClient,
@@ -67,7 +65,7 @@ export async function onJobStatusChange(
   const quoteFollowUpDays = user?.quoteFollowUpDays ?? 2;
   const reviewRequestDays = user?.reviewRequestDays ?? 1;
 
-  log("job_status_change", { jobId: job.id, from: job.status, to: newStatus });
+  log("automation", "job_status_change", { jobId: job.id, from: job.status, to: newStatus });
 
   let updated: Job = job;
 
@@ -157,7 +155,7 @@ export async function onJobStatusChange(
   }
 
   const newContactStatus = await recalculateContactStatus(tx, job.contactId, { lastContactedAt: now });
-  log("contact_status_updated", { contactId: job.contactId, status: newContactStatus });
+  log("automation", "contact_status_updated", { contactId: job.contactId, status: newContactStatus });
 
   return updated;
 }
