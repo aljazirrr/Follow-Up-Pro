@@ -21,6 +21,7 @@ import { FollowUpCard } from "@/components/followups/followup-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { ActivationChecklist } from "@/components/shared/activation-checklist";
 import { inactiveWhereClause } from "@/lib/contact-status";
 import { staleQuoteWhereClause } from "@/lib/stale-quotes";
 
@@ -32,7 +33,14 @@ export default async function DashboardPage() {
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { quoteFollowUpDays: true },
+    select: {
+      quoteFollowUpDays: true,
+      onboardingCompleted: true,
+      firstContactCreatedAt: true,
+      firstJobCreatedAt: true,
+      firstQuotedJobAt: true,
+      firstTaskCompletedAt: true,
+    },
   });
   const quoteFollowUpDays = dbUser?.quoteFollowUpDays ?? 2;
 
@@ -99,6 +107,17 @@ export default async function DashboardPage() {
           </>
         }
       />
+
+      {!dbUser?.firstTaskCompletedAt && (
+        <ActivationChecklist
+          onboardingCompleted={dbUser?.onboardingCompleted ?? false}
+          firstContactCreatedAt={dbUser?.firstContactCreatedAt ?? null}
+          firstJobCreatedAt={dbUser?.firstJobCreatedAt ?? null}
+          firstQuotedJobAt={dbUser?.firstQuotedJobAt ?? null}
+          firstTaskCompletedAt={dbUser?.firstTaskCompletedAt ?? null}
+          t={t}
+        />
+      )}
 
       {/* KPIs */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7">

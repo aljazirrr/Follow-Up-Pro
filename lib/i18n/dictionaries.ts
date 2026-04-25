@@ -143,6 +143,15 @@ const en = {
     upcomingEmptyTitle: "No upcoming tasks",
     upcomingEmptyDesc: "New follow-ups will appear here when jobs move through your pipeline.",
     staleQuotes: "Stale quotes",
+    checklist: {
+      title: "Your setup progress",
+      doneCount: "{done} of {total} done",
+      step1: "Complete onboarding",
+      step2: "Add your first contact",
+      step3: "Create your first job",
+      step4: "Quote your first job",
+      step5: "Complete your first follow-up",
+    },
   },
   contacts: {
     title: "Contacts",
@@ -593,6 +602,15 @@ const nl: typeof en = {
     upcomingEmptyTitle: "Geen aankomende taken",
     upcomingEmptyDesc: "Nieuwe opvolgingen verschijnen hier wanneer opdrachten door je pipeline gaan.",
     staleQuotes: "Verlopen offertes",
+    checklist: {
+      title: "Je voortgang",
+      doneCount: "{done} van {total} gedaan",
+      step1: "Onboarding voltooien",
+      step2: "Voeg je eerste contact toe",
+      step3: "Maak je eerste opdracht aan",
+      step4: "Offreer je eerste opdracht",
+      step5: "Rond je eerste opvolging af",
+    },
   },
   contacts: {
     title: "Contacten",
