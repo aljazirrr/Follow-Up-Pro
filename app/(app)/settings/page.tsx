@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { AutomationForm } from "@/components/settings/automation-form";
 
 export default async function SettingsPage() {
   const user = await requireUser();
@@ -71,27 +72,10 @@ export default async function SettingsPage() {
           <CardTitle>{s.automation}</CardTitle>
         </CardHeader>
         <CardContent>
-          <dl className="grid gap-4 text-sm sm:grid-cols-2">
-            <div>
-              <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                {s.quoteFollowUpDays}
-              </dt>
-              <dd>
-                {dbUser?.quoteFollowUpDays ?? 2} {dbUser?.quoteFollowUpDays === 1 ? s.day : s.days}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                {s.reviewRequestDays}
-              </dt>
-              <dd>
-                {dbUser?.reviewRequestDays ?? 1} {dbUser?.reviewRequestDays === 1 ? s.day : s.days}
-              </dd>
-            </div>
-          </dl>
-          <p className="mt-4 text-xs text-muted-foreground">
-            {s.automationNote}
-          </p>
+          <AutomationForm
+            quoteFollowUpDays={dbUser?.quoteFollowUpDays ?? 2}
+            reviewRequestDays={dbUser?.reviewRequestDays ?? 1}
+          />
         </CardContent>
       </Card>
     </div>

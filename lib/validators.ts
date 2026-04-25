@@ -80,3 +80,8 @@ export const sendEmailSchema = z.object({
   subject: z.string().min(1),
   body: z.string().min(1),
 });
+
+export const automationSettingsSchema = z.object({
+  quoteFollowUpDays: z.number().int().min(1).max(30),
+  reviewRequestDays: z.number().int().min(1).max(30),
+});
