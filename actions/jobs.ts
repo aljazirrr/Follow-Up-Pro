@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { jobSchema, jobStatusSchema } from "@/lib/validators";
 import { onJobStatusChange } from "@/lib/automation";
 import { assertCanCreateTask, PlanLimitError } from "@/lib/plan-limits";
+import { staleQuoteWhereClause } from "@/lib/stale-quotes";
 import type { JobStatus } from "@prisma/client";
 
 type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
@@ -116,6 +117,33 @@ export async function createStaleFollowUp(jobId: string): Promise<ActionResult> 
   revalidatePath("/dashboard");
   revalidatePath(`/contacts/${job.contactId}`);
   return { ok: true };
+}
+
+export async function markAllStaleAsLost(): Promise<ActionResult & { count?: number }> {
+  const user = await requireUser();
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { quoteFollowUpDays: true },
+  });
+  const quoteFollowUpDays = dbUser?.quoteFollowUpDays ?? 2;
+
+  const staleJobs = await prisma.job.findMany({
+    where: staleQuoteWhereClause(user.id, quoteFollowUpDays),
+  });
+
+  if (staleJobs.length === 0) return { ok: true, count: 0 };
+
+  await prisma.$transaction(async (tx) => {
+    for (const job of staleJobs) {
+      await onJobStatusChange(tx, job, "LOST");
+    }
+  });
+
+  revalidatePath("/jobs");
+  revalidatePath("/dashboard");
+  revalidatePath("/contacts");
+  return { ok: true, count: staleJobs.length };
 }
 
 export async function deleteJob(id: string): Promise<ActionResult> {

@@ -230,6 +230,9 @@ const en = {
     statusUpdated: "Status updated to",
     followUp: "Follow up",
     followUpCreated: "Follow-up task created",
+    markStaleAsLost: "Mark {count} stale as lost",
+    markStaleAsLostConfirm: "Mark {count} stale quote(s) as lost? This cannot be undone.",
+    staleMarkedLost: "{count} stale quote(s) marked as lost",
   },
   followups: {
     title: "Follow-ups",
@@ -677,6 +680,9 @@ const nl: typeof en = {
     statusUpdated: "Status gewijzigd naar",
     followUp: "Opvolgen",
     followUpCreated: "Opvolgingstaak aangemaakt",
+    markStaleAsLost: "{count} verlopen markeren als verloren",
+    markStaleAsLostConfirm: "{count} verlopen offerte(s) als verloren markeren? Dit kan niet ongedaan worden gemaakt.",
+    staleMarkedLost: "{count} verlopen offerte(s) gemarkeerd als verloren",
   },
   followups: {
     title: "Opvolgingen",

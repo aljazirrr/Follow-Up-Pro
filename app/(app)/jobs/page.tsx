@@ -13,6 +13,7 @@ import { JobStatusSelect } from "@/components/jobs/job-status-select";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import { isStaleQuote } from "@/lib/stale-quotes";
 import { FollowUpButton } from "@/components/jobs/follow-up-button";
+import { MarkStaleLostButton } from "@/components/jobs/mark-stale-lost-button";
 import { JobStatus, Prisma } from "@prisma/client";
 
 export default async function JobsPage({
@@ -44,6 +45,10 @@ export default async function JobsPage({
     take: 100,
   });
 
+  const staleCount = jobs.filter(
+    (job) => job.status === "QUOTED" && isStaleQuote(job.quoteSentAt, quoteFollowUpDays, now)
+  ).length;
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -68,6 +73,12 @@ export default async function JobsPage({
               {j.apply}
             </button>
           </form>
+
+          {staleCount > 0 && (
+            <div className="mb-4">
+              <MarkStaleLostButton count={staleCount} />
+            </div>
+          )}
 
           {jobs.length === 0 ? (
             <EmptyState
