@@ -18,7 +18,10 @@ export const PLAN_LIMITS = {
 } as const;
 
 export class PlanLimitError extends Error {
-  constructor(message: string) {
+  constructor(
+    public readonly code: "contactLimit" | "taskLimit" | "templateLimit",
+    message: string
+  ) {
     super(message);
     this.name = "PlanLimitError";
   }
@@ -36,6 +39,7 @@ export async function assertCanCreateContact(userId: string, db: DbClient = pris
   const count = await db.contact.count({ where: { userId } });
   if (count >= limit) {
     throw new PlanLimitError(
+      "contactLimit",
       `Free plan is limited to ${limit} contacts. Upgrade to Pro for unlimited contacts.`
     );
   }
@@ -50,17 +54,19 @@ export async function assertCanCreateTask(userId: string, db: DbClient = prisma)
   });
   if (count >= limit) {
     throw new PlanLimitError(
+      "taskLimit",
       `Free plan is limited to ${limit} tasks per month. Upgrade to Pro for unlimited tasks.`
     );
   }
 }
 
-export async function assertCanCustomizeTemplates(userId: string, newCustomCount: number): Promise<void> {
-  const plan = await getPlan(userId);
+export async function assertCanCustomizeTemplates(userId: string, newCustomCount: number, db: DbClient = prisma): Promise<void> {
+  const plan = await getPlan(userId, db);
   const limit = PLAN_LIMITS[plan].customTemplates;
   if (limit === Infinity) return;
   if (newCustomCount > limit) {
     throw new PlanLimitError(
+      "templateLimit",
       `Free plan allows ${limit} custom template. Upgrade to Pro to edit all templates.`
     );
   }

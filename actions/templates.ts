@@ -7,6 +7,7 @@ import { templateSchema } from "@/lib/validators";
 import { assertCanCustomizeTemplates, PlanLimitError } from "@/lib/plan-limits";
 import { DEFAULT_TEMPLATES } from "@/emails/defaults";
 import { INDUSTRY_DEFAULTS } from "@/lib/industry-defaults";
+import { getDictionary, getLocale } from "@/lib/i18n";
 
 type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
 
@@ -29,10 +30,9 @@ export async function upsertTemplate(formData: FormData): Promise<ActionResult> 
   }
 
   const data = parsed.data;
-  const existing = await prisma.messageTemplate.findUnique({
-    where: { userId_type: { userId: user.id, type: data.type } },
-  });
 
+  // Determine whether the save will produce a custom template (outside the
+  // transaction — reads static defaults and user.industry, no race risk).
   const defaults = await getDefaultTemplates(user.id);
   const defaultBody = defaults.find((d) => d.type === data.type);
   const willBeCustom =
@@ -41,39 +41,48 @@ export async function upsertTemplate(formData: FormData): Promise<ActionResult> 
     defaultBody.body.trim() !== data.body.trim() ||
     defaultBody.name !== data.name;
 
-  if (willBeCustom) {
-    const otherCustom = await prisma.messageTemplate.count({
-      where: { userId: user.id, isDefault: false, type: { not: data.type } },
-    });
-    try {
-      await assertCanCustomizeTemplates(user.id, otherCustom + 1);
-    } catch (err) {
-      if (err instanceof PlanLimitError) return { ok: false, error: err.message };
-      throw err;
-    }
-  }
+  try {
+    await prisma.$transaction(async (tx) => {
+      if (willBeCustom) {
+        const otherCustom = await tx.messageTemplate.count({
+          where: { userId: user.id, isDefault: false, type: { not: data.type } },
+        });
+        await assertCanCustomizeTemplates(user.id, otherCustom + 1, tx);
+      }
 
-  if (existing) {
-    await prisma.messageTemplate.update({
-      where: { id: existing.id },
-      data: {
-        name: data.name,
-        subject: data.subject,
-        body: data.body,
-        isDefault: !willBeCustom,
-      },
+      const existing = await tx.messageTemplate.findUnique({
+        where: { userId_type: { userId: user.id, type: data.type } },
+      });
+
+      if (existing) {
+        await tx.messageTemplate.update({
+          where: { id: existing.id },
+          data: {
+            name: data.name,
+            subject: data.subject,
+            body: data.body,
+            isDefault: !willBeCustom,
+          },
+        });
+      } else {
+        await tx.messageTemplate.create({
+          data: {
+            userId: user.id,
+            type: data.type,
+            name: data.name,
+            subject: data.subject,
+            body: data.body,
+            isDefault: !willBeCustom,
+          },
+        });
+      }
     });
-  } else {
-    await prisma.messageTemplate.create({
-      data: {
-        userId: user.id,
-        type: data.type,
-        name: data.name,
-        subject: data.subject,
-        body: data.body,
-        isDefault: !willBeCustom,
-      },
-    });
+  } catch (err) {
+    if (err instanceof PlanLimitError) {
+      const t = getDictionary(getLocale());
+      return { ok: false, error: t.planLimits[err.code] };
+    }
+    throw err;
   }
 
   revalidatePath("/templates");

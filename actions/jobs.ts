@@ -9,6 +9,7 @@ import { setMilestoneOnce } from "@/lib/activation";
 import { log } from "@/lib/logger";
 import { assertCanCreateTask, PlanLimitError } from "@/lib/plan-limits";
 import { staleQuoteWhereClause } from "@/lib/stale-quotes";
+import { getDictionary, getLocale } from "@/lib/i18n";
 import type { JobStatus } from "@prisma/client";
 
 type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
@@ -39,7 +40,7 @@ export async function createJob(formData: FormData): Promise<ActionResult> {
         title: data.title,
         description: data.description || null,
         estimatedValue: data.estimatedValue ? data.estimatedValue : null,
-        currency: data.currency || "USD",
+        currency: data.currency || "EUR",
         status: "NEW",
       },
     });
@@ -120,7 +121,10 @@ export async function createStaleFollowUp(jobId: string): Promise<ActionResult> 
       });
     });
   } catch (err) {
-    if (err instanceof PlanLimitError) return { ok: false, error: err.message };
+    if (err instanceof PlanLimitError) {
+      const t = getDictionary(getLocale());
+      return { ok: false, error: t.planLimits[err.code] };
+    }
     throw err;
   }
 

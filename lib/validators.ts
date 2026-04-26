@@ -40,7 +40,7 @@ export const jobSchema = z.object({
     .optional()
     .or(z.literal(""))
     .refine((v) => !v || !Number.isNaN(parseFloat(v)), "Must be a number"),
-  currency: z.string().default("USD"),
+  currency: z.string().default("EUR"),
   status: z.nativeEnum(JobStatus).default(JobStatus.NEW),
 });
 export type JobInput = z.infer<typeof jobSchema>;

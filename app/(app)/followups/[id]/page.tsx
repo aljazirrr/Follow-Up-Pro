@@ -17,7 +17,8 @@ export default async function FollowUpDetailPage({
 }) {
   const { id } = await params;
   const user = await requireUser();
-  const t = getDictionary(getLocale()).followups;
+  const dict = getDictionary(getLocale());
+  const t = dict.followups;
 
   const task = await prisma.followUpTask.findFirst({
     where: { id, userId: user.id },
@@ -63,7 +64,7 @@ export default async function FollowUpDetailPage({
 
       <PageHeader
         title={task.title}
-        description={`For ${task.contact.fullName}${task.job ? ` · ${task.job.title}` : ""}`}
+        description={`${t.for} ${task.contact.fullName}${task.job ? ` · ${task.job.title}` : ""}`}
       />
 
       {task.channel === "EMAIL" ? (

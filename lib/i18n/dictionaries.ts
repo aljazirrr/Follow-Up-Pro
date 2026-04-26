@@ -214,6 +214,8 @@ const en = {
     nextAction: "Next action",
     reactivate: "Reactivate",
     reactivated: "Contact reactivated",
+    reactivateTaskTitle: "Reactivate contact",
+    reactivateTaskPreview: "Reach out to reconnect",
     jobEvents: {
       created: "Job created",
       quoted: "Quote sent",
@@ -305,6 +307,7 @@ const en = {
     markManualDoneConfirm: "Mark {count} manual task(s) as done? This confirms you completed them outside the app.",
     markManualDoneSuccess: "Marked {count} manual task(s) done",
     markManualDoneNoop: "No manual tasks were updated",
+    for: "For",
   },
   templates: {
     title: "Email templates",
@@ -498,6 +501,11 @@ const en = {
     notFoundTitle: "Page not found",
     notFoundBody: "The page you're looking for doesn't exist or has been moved.",
     goHome: "Go home",
+  },
+  planLimits: {
+    contactLimit: "Free plan is limited to 20 contacts. Upgrade to Pro for unlimited contacts.",
+    taskLimit: "Free plan is limited to 20 tasks per month. Upgrade to Pro for unlimited tasks.",
+    templateLimit: "Free plan allows 1 custom template. Upgrade to Pro to edit all templates.",
   },
 };
 
@@ -715,6 +723,8 @@ const nl: typeof en = {
     nextAction: "Volgende actie",
     reactivate: "Reactiveren",
     reactivated: "Contact gereactiveerd",
+    reactivateTaskTitle: "Contact reactiveren",
+    reactivateTaskPreview: "Neem contact op om te heropstarten",
     jobEvents: {
       created: "Opdracht aangemaakt",
       quoted: "Offerte verstuurd",
@@ -806,6 +816,7 @@ const nl: typeof en = {
     markManualDoneConfirm: "{count} handmatige taak/taken als gedaan markeren? Dit bevestigt dat je ze buiten de app hebt afgerond.",
     markManualDoneSuccess: "{count} handmatige taak/taken als gedaan gemarkeerd",
     markManualDoneNoop: "Geen handmatige taken bijgewerkt",
+    for: "Voor",
   },
   templates: {
     title: "E-mailsjablonen",
@@ -999,6 +1010,11 @@ const nl: typeof en = {
     notFoundTitle: "Pagina niet gevonden",
     notFoundBody: "De pagina die je zoekt bestaat niet of is verplaatst.",
     goHome: "Naar home",
+  },
+  planLimits: {
+    contactLimit: "Het gratis abonnement is beperkt tot 20 contacten. Upgrade naar Pro voor onbeperkte contacten.",
+    taskLimit: "Het gratis abonnement is beperkt tot 20 taken per maand. Upgrade naar Pro voor onbeperkte taken.",
+    templateLimit: "Het gratis abonnement staat 1 aangepast sjabloon toe. Upgrade naar Pro om alle sjablonen te bewerken.",
   },
 };
 

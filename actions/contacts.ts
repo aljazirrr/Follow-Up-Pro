@@ -7,6 +7,7 @@ import { contactSchema } from "@/lib/validators";
 import { assertCanCreateContact, PlanLimitError } from "@/lib/plan-limits";
 import { setMilestoneOnce } from "@/lib/activation";
 import { log } from "@/lib/logger";
+import { getDictionary, getLocale } from "@/lib/i18n";
 
 type ActionResult = { ok: true; id?: string } | { ok: false; error: string };
 
@@ -33,7 +34,10 @@ export async function createContact(formData: FormData): Promise<ActionResult> {
       return tx.contact.create({ data: { ...data, userId: user.id } });
     });
   } catch (err) {
-    if (err instanceof PlanLimitError) return { ok: false, error: err.message };
+    if (err instanceof PlanLimitError) {
+      const t = getDictionary(getLocale());
+      return { ok: false, error: t.planLimits[err.code] };
+    }
     throw err;
   }
 
@@ -94,6 +98,7 @@ export async function reactivateContact(contactId: string): Promise<ActionResult
   if (!contact) return { ok: false, error: "Contact not found" };
 
   const now = new Date();
+  const t = getDictionary(getLocale());
   await prisma.$transaction(async (tx) => {
     await tx.contact.update({
       where: { id: contactId },
@@ -104,8 +109,8 @@ export async function reactivateContact(contactId: string): Promise<ActionResult
         userId: user.id,
         contactId,
         type: "REACTIVATION",
-        title: "Reactivate contact",
-        messagePreview: "Reach out to reconnect",
+        title: t.contacts.reactivateTaskTitle,
+        messagePreview: t.contacts.reactivateTaskPreview,
         dueDate: now,
         status: "PENDING",
         channel: "MANUAL",
