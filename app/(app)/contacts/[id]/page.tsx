@@ -20,10 +20,13 @@ import type { ContactStatus, Job } from "@prisma/client";
 
 export default async function ContactDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ new?: string }>;
 }) {
   const { id } = await params;
+  const { new: isNew } = await searchParams;
   const user = await requireUser();
   const t = getDictionary(getLocale());
   const c = t.contacts;
@@ -182,7 +185,7 @@ export default async function ContactDetailPage({
               <CardTitle>{t.nav.jobs}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <JobForm contactId={contact.id} />
+              <JobForm contactId={contact.id} autoOpen={isNew === "1"} />
               {contact.jobs.length === 0 ? (
                 <EmptyState
                   title={c.noJobsTitle}

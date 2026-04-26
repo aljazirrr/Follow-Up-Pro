@@ -12,10 +12,10 @@ import { JobStatus } from "@prisma/client";
 import { createJob } from "@/actions/jobs";
 import { useTranslation } from "@/lib/i18n/client";
 
-export function JobForm({ contactId }: { contactId: string }) {
+export function JobForm({ contactId, autoOpen = false }: { contactId: string; autoOpen?: boolean }) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen);
   const { t } = useTranslation();
   const j = t.jobs;
 
@@ -42,6 +42,9 @@ export function JobForm({ contactId }: { contactId: string }) {
 
   return (
     <form onSubmit={onSubmit} className="grid gap-3 rounded-lg border bg-muted/20 p-4">
+      {autoOpen && (
+        <p className="text-sm text-muted-foreground">{j.addFirstJob}</p>
+      )}
       <div className="space-y-1.5">
         <Label htmlFor="title">{j.titleLabel}</Label>
         <Input id="title" name="title" required placeholder={j.titlePlaceholder} />
