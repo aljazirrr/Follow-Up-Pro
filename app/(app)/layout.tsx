@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { Sidebar } from "@/components/app/sidebar";
 import { Topbar } from "@/components/app/topbar";
 import { UpgradeBanner } from "@/components/app/upgrade-banner";
+import { MobileNav } from "@/components/app/mobile-nav";
 
 const SKIP_ONBOARDING_REDIRECT = ["/settings", "/billing"];
 
@@ -48,7 +49,8 @@ export default async function AppLayout({
       <div className="flex flex-1 flex-col">
         <Topbar email={user.email ?? ""} />
         <UpgradeBanner plan={plan} />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
+        <main className="flex-1 p-4 pb-16 md:p-6 lg:p-8">{children}</main>
+        <MobileNav overdueCount={overdueCount} todayCount={todayCount} />
       </div>
     </div>
   );

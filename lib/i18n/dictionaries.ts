@@ -490,6 +490,15 @@ const en = {
     WHATSAPP: "WhatsApp",
     OTHER: "Other",
   },
+  errors: {
+    appErrorTitle: "Something went wrong",
+    appErrorBody: "An unexpected error occurred. Try again, or go back to the dashboard.",
+    tryAgain: "Try again",
+    goToDashboard: "Go to dashboard",
+    notFoundTitle: "Page not found",
+    notFoundBody: "The page you're looking for doesn't exist or has been moved.",
+    goHome: "Go home",
+  },
 };
 
 const nl: typeof en = {
@@ -981,6 +990,15 @@ const nl: typeof en = {
     PHONE: "Telefoon",
     WHATSAPP: "WhatsApp",
     OTHER: "Overig",
+  },
+  errors: {
+    appErrorTitle: "Er ging iets mis",
+    appErrorBody: "Er is een onverwachte fout opgetreden. Probeer het opnieuw of ga terug naar het dashboard.",
+    tryAgain: "Opnieuw proberen",
+    goToDashboard: "Naar dashboard",
+    notFoundTitle: "Pagina niet gevonden",
+    notFoundBody: "De pagina die je zoekt bestaat niet of is verplaatst.",
+    goHome: "Naar home",
   },
 };
 
