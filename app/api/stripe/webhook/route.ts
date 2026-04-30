@@ -35,6 +35,7 @@ async function upsertSubscriptionForUser(userId: string, sub: Stripe.Subscriptio
 
   const status = mapStatus(sub.status);
   const plan = mapPlan(status);
+  const periodEndTs = sub.items.data[0]?.current_period_end;
 
   console.log("[stripe webhook] upsertSubscriptionForUser");
   console.log("[stripe webhook] userId:", userId);
@@ -43,6 +44,7 @@ async function upsertSubscriptionForUser(userId: string, sub: Stripe.Subscriptio
   console.log("[stripe webhook] stripeStatus:", sub.status);
   console.log("[stripe webhook] mappedStatus:", status);
   console.log("[stripe webhook] mappedPlan:", plan);
+  console.log("[stripe webhook] periodEndTs:", periodEndTs);
 
   await prisma.subscription.upsert({
     where: { userId },
@@ -53,7 +55,7 @@ async function upsertSubscriptionForUser(userId: string, sub: Stripe.Subscriptio
       stripePriceId: sub.items.data[0]?.price?.id ?? null,
       status,
       plan,
-      currentPeriodEnd: new Date(sub.current_period_end * 1000),
+      currentPeriodEnd: periodEndTs ? new Date(periodEndTs * 1000) : null,
     },
     update: {
       stripeCustomerId: customerId,
@@ -61,7 +63,7 @@ async function upsertSubscriptionForUser(userId: string, sub: Stripe.Subscriptio
       stripePriceId: sub.items.data[0]?.price?.id ?? null,
       status,
       plan,
-      currentPeriodEnd: new Date(sub.current_period_end * 1000),
+      currentPeriodEnd: periodEndTs ? new Date(periodEndTs * 1000) : null,
     },
   });
 
@@ -90,10 +92,12 @@ async function syncSubscriptionByCustomer(sub: Stripe.Subscription) {
 
   const status = mapStatus(sub.status);
   const plan = mapPlan(status);
+  const periodEndTs = sub.items.data[0]?.current_period_end;
 
   console.log("[stripe webhook] updating existing subscription row");
   console.log("[stripe webhook] mappedStatus:", status);
   console.log("[stripe webhook] mappedPlan:", plan);
+  console.log("[stripe webhook] periodEndTs:", periodEndTs);
 
   await prisma.subscription.update({
     where: { id: existing.id },
@@ -102,7 +106,7 @@ async function syncSubscriptionByCustomer(sub: Stripe.Subscription) {
       stripePriceId: sub.items.data[0]?.price?.id ?? null,
       status,
       plan,
-      currentPeriodEnd: new Date(sub.current_period_end * 1000),
+      currentPeriodEnd: periodEndTs ? new Date(periodEndTs * 1000) : null,
     },
   });
 
