@@ -85,3 +85,10 @@ export const automationSettingsSchema = z.object({
   quoteFollowUpDays: z.number().int().min(1).max(30),
   reviewRequestDays: z.number().int().min(1).max(30),
 });
+
+export const feedbackSchema = z.object({
+  type: z.enum(["bug", "confusing", "idea"]),
+  message: z.string().min(10, "Message must be at least 10 characters").max(1000),
+  pathname: z.string().optional().or(z.literal("")),
+});
+export type FeedbackInput = z.infer<typeof feedbackSchema>;

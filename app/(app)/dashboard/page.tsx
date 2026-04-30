@@ -23,6 +23,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { ActivationChecklist } from "@/components/shared/activation-checklist";
 import { PostActivationCard } from "@/components/shared/post-activation-card";
+import { FeedbackNudge } from "@/components/app/feedback-nudge";
 import { inactiveWhereClause } from "@/lib/contact-status";
 import { staleQuoteWhereClause } from "@/lib/stale-quotes";
 
@@ -119,7 +120,10 @@ export default async function DashboardPage() {
           t={t}
         />
       ) : (
-        <PostActivationCard />
+        <>
+          <PostActivationCard />
+          <FeedbackNudge />
+        </>
       )}
 
       {/* KPIs */}

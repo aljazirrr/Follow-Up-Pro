@@ -4,6 +4,7 @@ import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { AutomationForm } from "@/components/settings/automation-form";
+import { FeedbackForm } from "@/components/app/feedback-form";
 
 export default async function SettingsPage() {
   const user = await requireUser();
@@ -76,6 +77,16 @@ export default async function SettingsPage() {
             quoteFollowUpDays={dbUser?.quoteFollowUpDays ?? 2}
             reviewRequestDays={dbUser?.reviewRequestDays ?? 1}
           />
+        </CardContent>
+      </Card>
+
+      <Card id="feedback">
+        <CardHeader>
+          <CardTitle>{t.feedback.sectionTitle}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t.feedback.sectionDesc}</p>
+        </CardHeader>
+        <CardContent>
+          <FeedbackForm />
         </CardContent>
       </Card>
     </div>

@@ -507,6 +507,23 @@ const en = {
     taskLimit: "Free plan is limited to 20 tasks per month. Upgrade to Pro for unlimited tasks.",
     templateLimit: "Free plan allows 1 custom template. Upgrade to Pro to edit all templates.",
   },
+  feedback: {
+    sectionTitle: "Send feedback",
+    sectionDesc: "Found a bug or have a suggestion? Let us know.",
+    typeLabel: "Type",
+    typeBug: "Bug",
+    typeConfusing: "Confusing",
+    typeIdea: "Idea",
+    messageLabel: "Message",
+    messagePlaceholder: "Describe the issue or idea…",
+    submit: "Send feedback",
+    submitting: "Sending…",
+    success: "Thanks for your feedback!",
+    nudgeTitle: "How's Rebooker working for you?",
+    nudgeBody: "You've completed your first follow-up task. We'd love to hear what you think.",
+    nudgeCta: "Share feedback",
+    nudgeDismiss: "Dismiss",
+  },
 };
 
 const nl: typeof en = {
@@ -1015,6 +1032,23 @@ const nl: typeof en = {
     contactLimit: "Het gratis abonnement is beperkt tot 20 contacten. Upgrade naar Pro voor onbeperkte contacten.",
     taskLimit: "Het gratis abonnement is beperkt tot 20 taken per maand. Upgrade naar Pro voor onbeperkte taken.",
     templateLimit: "Het gratis abonnement staat 1 aangepast sjabloon toe. Upgrade naar Pro om alle sjablonen te bewerken.",
+  },
+  feedback: {
+    sectionTitle: "Feedback sturen",
+    sectionDesc: "Een bug gevonden of een suggestie? Laat het ons weten.",
+    typeLabel: "Type",
+    typeBug: "Bug",
+    typeConfusing: "Verwarrend",
+    typeIdea: "Idee",
+    messageLabel: "Bericht",
+    messagePlaceholder: "Omschrijf het probleem of idee…",
+    submit: "Feedback sturen",
+    submitting: "Versturen…",
+    success: "Bedankt voor je feedback!",
+    nudgeTitle: "Hoe werkt Rebooker voor jou?",
+    nudgeBody: "Je hebt je eerste opvolgingstaak afgerond. We horen graag wat je ervan vindt.",
+    nudgeCta: "Feedback geven",
+    nudgeDismiss: "Sluiten",
   },
 };
 
