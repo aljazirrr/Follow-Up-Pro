@@ -21,7 +21,7 @@ export default function PricingPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-4xl font-semibold">
-              $0 <span className="text-sm font-normal text-muted-foreground">{t.perMonth}</span>
+              €0 <span className="text-sm font-normal text-muted-foreground">{t.perMonth}</span>
             </div>
             <ul className="space-y-2 text-sm">
               {t.freeFeatures.map((f) => (
@@ -43,7 +43,7 @@ export default function PricingPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-4xl font-semibold">
-              $19 <span className="text-sm font-normal text-muted-foreground">{t.perMonth}</span>
+              €19 <span className="text-sm font-normal text-muted-foreground">{t.perMonth}</span>
             </div>
             <ul className="space-y-2 text-sm">
               {t.proFeatures.map((f) => (
@@ -53,8 +53,8 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Link href="/register" className={buttonVariants({ size: "default" })}>
-              {t.startFreeUpgrade}
+            <Link href="/billing" className={buttonVariants({ size: "default" })}>
+              {t.upgradeNow}
             </Link>
           </CardContent>
         </Card>

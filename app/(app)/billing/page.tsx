@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UpgradeButton } from "./upgrade-button";
+import { ManageSubscriptionButton } from "./manage-button";
 import { STRIPE_CONFIGURED } from "@/lib/stripe";
 import { formatDate } from "@/lib/utils";
 
@@ -43,7 +44,7 @@ export default async function BillingPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="text-3xl font-semibold">
-              $0 <span className="text-sm font-normal text-muted-foreground">{t.perMonth}</span>
+              €0 <span className="text-sm font-normal text-muted-foreground">{t.perMonth}</span>
             </div>
             <ul className="space-y-1.5 text-sm">
               {t.freeFeatures.map((f) => (
@@ -63,7 +64,7 @@ export default async function BillingPage({
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="text-3xl font-semibold">
-              $19 <span className="text-sm font-normal text-muted-foreground">{t.perMonth}</span>
+              €19 <span className="text-sm font-normal text-muted-foreground">{t.perMonth}</span>
             </div>
             <ul className="space-y-1.5 text-sm">
               {t.proFeatures.map((f) => (
@@ -76,11 +77,18 @@ export default async function BillingPage({
             {plan === "FREE" ? (
               <UpgradeButton configured={STRIPE_CONFIGURED} />
             ) : (
-              <div className="text-sm text-muted-foreground">
-                {t.renews}{" "}
-                {sub?.currentPeriodEnd
-                  ? formatDate(sub.currentPeriodEnd)
-                  : "—"}
+              <div className="space-y-2">
+                <div className="text-sm text-muted-foreground">
+                  {t.renews}{" "}
+                  {sub?.currentPeriodEnd
+                    ? formatDate(sub.currentPeriodEnd)
+                    : "—"}
+                </div>
+                {STRIPE_CONFIGURED ? (
+                  <ManageSubscriptionButton />
+                ) : (
+                  <p className="text-xs text-muted-foreground">{t.cancelInfo}</p>
+                )}
               </div>
             )}
           </CardContent>

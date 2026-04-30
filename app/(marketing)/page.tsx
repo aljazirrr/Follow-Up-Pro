@@ -138,6 +138,9 @@ export default function LandingPage() {
             <Zap className="h-3 w-3" />
             {m.badge}
           </div>
+          <div className="mx-auto mt-2 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+            {m.betaBadge}
+          </div>
           <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
             {m.hero}
           </h1>
