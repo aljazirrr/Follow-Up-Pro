@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
-import type { SubscriptionStatus } from "@prisma/client";
+import type { SubscriptionStatus, PlanType } from "@prisma/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,18 +25,54 @@ function mapStatus(s: Stripe.Subscription.Status): SubscriptionStatus {
   }
 }
 
-async function syncSubscription(sub: Stripe.Subscription) {
-  const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+function mapPlan(status: SubscriptionStatus): PlanType {
+  return status === "ACTIVE" || status === "TRIALING" ? "PRO" : "FREE";
+}
+
+async function upsertSubscriptionForUser(userId: string, sub: Stripe.Subscription) {
+  const customerId =
+    typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+
+  const status = mapStatus(sub.status);
+  const plan = mapPlan(status);
+
+  await prisma.subscription.upsert({
+    where: { userId },
+    create: {
+      userId,
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: sub.id,
+      stripePriceId: sub.items.data[0]?.price?.id ?? null,
+      status,
+      plan,
+      currentPeriodEnd: new Date(sub.current_period_end * 1000),
+    },
+    update: {
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: sub.id,
+      stripePriceId: sub.items.data[0]?.price?.id ?? null,
+      status,
+      plan,
+      currentPeriodEnd: new Date(sub.current_period_end * 1000),
+    },
+  });
+}
+
+async function syncSubscriptionByCustomer(sub: Stripe.Subscription) {
+  const customerId =
+    typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+
   const existing = await prisma.subscription.findFirst({
     where: { stripeCustomerId: customerId },
   });
+
   if (!existing) {
     console.warn("[stripe webhook] No subscription row for customer", customerId);
     return;
   }
 
   const status = mapStatus(sub.status);
-  const isActive = status === "ACTIVE" || status === "TRIALING";
+  const plan = mapPlan(status);
 
   await prisma.subscription.update({
     where: { id: existing.id },
@@ -44,7 +80,7 @@ async function syncSubscription(sub: Stripe.Subscription) {
       stripeSubscriptionId: sub.id,
       stripePriceId: sub.items.data[0]?.price?.id ?? null,
       status,
-      plan: isActive ? "PRO" : "FREE",
+      plan,
       currentPeriodEnd: new Date(sub.current_period_end * 1000),
     },
   });
@@ -76,32 +112,52 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        if (session.subscription) {
-          const subId =
-            typeof session.subscription === "string"
-              ? session.subscription
-              : session.subscription.id;
-          const sub = await stripe.subscriptions.retrieve(subId);
-          await syncSubscription(sub);
+
+        const userId = session.metadata?.userId;
+        const subscriptionId =
+          typeof session.subscription === "string"
+            ? session.subscription
+            : session.subscription?.id;
+
+        if (!userId || !subscriptionId) {
+          console.warn("[stripe webhook] Missing userId or subscriptionId", {
+            userId,
+            subscriptionId,
+          });
+          break;
         }
+
+        const sub = await stripe.subscriptions.retrieve(subscriptionId);
+        await upsertSubscriptionForUser(userId, sub);
         break;
       }
+
       case "customer.subscription.created":
       case "customer.subscription.updated": {
-        await syncSubscription(event.data.object as Stripe.Subscription);
+        const sub = event.data.object as Stripe.Subscription;
+        await syncSubscriptionByCustomer(sub);
         break;
       }
+
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
-        const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+        const customerId =
+          typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+
         await prisma.subscription.updateMany({
           where: { stripeCustomerId: customerId },
-          data: { plan: "FREE", status: "CANCELED", stripeSubscriptionId: null },
+          data: {
+            plan: "FREE",
+            status: "CANCELED",
+            stripeSubscriptionId: null,
+            stripePriceId: null,
+            currentPeriodEnd: null,
+          },
         });
         break;
       }
+
       default:
-        // Ignore other events.
         break;
     }
   } catch (err) {
