@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
   AlertTriangle,
   Calendar,
@@ -13,6 +12,8 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getLocale, getDictionary } from "@/lib/i18n";
+import { DetailersTracker } from "@/components/marketing/detailers-tracker";
+import { DetailersCtaLink } from "@/components/marketing/detailers-cta";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://rebooker.io";
 const PAGE_URL = `${SITE_URL}/for/auto-detailers`;
@@ -102,6 +103,7 @@ export default function AutoDetailersPage() {
 
   return (
     <div>
+      <DetailersTracker />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
@@ -128,15 +130,19 @@ export default function AutoDetailersPage() {
             {d.heroSub}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/register" className={buttonVariants({ size: "lg" })}>
-              {m.startFree}
-            </Link>
-            <Link
+            <DetailersCtaLink
+              href="/register"
+              cta="start_free"
+              eventName="landing_detailers_cta_clicked"
+              label={m.startFree}
+            />
+            <DetailersCtaLink
               href="/pricing"
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              {m.viewPricing}
-            </Link>
+              cta="view_pricing"
+              eventName="landing_detailers_pricing_clicked"
+              label={m.viewPricing}
+              variant="outline"
+            />
           </div>
           <p className="mt-4 text-xs text-muted-foreground">{m.noCardNeeded}</p>
         </div>
@@ -241,15 +247,19 @@ export default function AutoDetailersPage() {
           <h2 className="mt-4 text-2xl font-semibold tracking-tight">{d.ctaTitle}</h2>
           <p className="mt-2 text-sm text-muted-foreground">{d.ctaSub}</p>
           <div className="mt-6 flex justify-center gap-3">
-            <Link href="/register" className={buttonVariants({ size: "lg" })}>
-              {m.startFree}
-            </Link>
-            <Link
+            <DetailersCtaLink
+              href="/register"
+              cta="start_free"
+              eventName="landing_detailers_cta_clicked"
+              label={m.startFree}
+            />
+            <DetailersCtaLink
               href="/pricing"
-              className={buttonVariants({ variant: "outline", size: "lg" })}
-            >
-              {m.seePricing}
-            </Link>
+              cta="view_pricing"
+              eventName="landing_detailers_pricing_clicked"
+              label={m.seePricing}
+              variant="outline"
+            />
           </div>
           <p className="mt-4 text-xs text-muted-foreground">{m.noCardNeeded}</p>
         </div>
