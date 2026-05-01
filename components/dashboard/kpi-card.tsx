@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -7,11 +8,13 @@ export function KPIStatCard({
   value,
   icon: Icon,
   tone = "default",
+  href,
 }: {
   label: string;
   value: number | string;
   icon?: LucideIcon;
   tone?: "default" | "warning" | "success" | "destructive";
+  href?: string;
 }) {
   const toneClass = {
     default: "text-muted-foreground",
@@ -20,8 +23,8 @@ export function KPIStatCard({
     destructive: "text-destructive",
   }[tone];
 
-  return (
-    <Card>
+  const card = (
+    <Card className={href ? "transition-colors hover:bg-muted/50" : undefined}>
       <CardContent className="flex items-center justify-between pt-6">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -33,4 +36,10 @@ export function KPIStatCard({
       </CardContent>
     </Card>
   );
+
+  if (href) {
+    return <Link href={href} className="block">{card}</Link>;
+  }
+
+  return card;
 }

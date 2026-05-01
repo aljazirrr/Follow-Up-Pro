@@ -3,44 +3,60 @@ import { requireUser } from "@/lib/auth";
 import { getLocale, getDictionary } from "@/lib/i18n";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { AutomationForm } from "@/components/settings/automation-form";
+import { FeedbackForm } from "@/components/app/feedback-form";
 
 export default async function SettingsPage() {
   const user = await requireUser();
-  const t = getDictionary(getLocale()).settings;
+  const t = getDictionary(getLocale());
+  const s = t.settings;
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
     select: {
       email: true,
       name: true,
       ownerName: true,
+      industry: true,
+      quoteFollowUpDays: true,
+      reviewRequestDays: true,
       createdAt: true,
     },
   });
 
+  const industryLabel = dbUser?.industry
+    ? t.onboarding.industries[dbUser.industry as keyof typeof t.onboarding.industries]?.label ?? dbUser.industry
+    : "—";
+
   return (
     <div className="space-y-6">
-      <PageHeader title={t.title} description={t.desc} />
+      <PageHeader title={s.title} description={s.desc} />
       <Card>
         <CardHeader>
-          <CardTitle>{t.account}</CardTitle>
+          <CardTitle>{s.account}</CardTitle>
         </CardHeader>
         <CardContent>
           <dl className="grid gap-4 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t.email}
+                {s.email}
               </dt>
               <dd>{dbUser?.email}</dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t.ownerName}
+                {s.ownerName}
               </dt>
               <dd>{dbUser?.ownerName ?? "—"}</dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t.memberSince}
+                {s.businessType}
+              </dt>
+              <dd>{industryLabel}</dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+                {s.memberSince}
               </dt>
               <dd>
                 {dbUser?.createdAt
@@ -49,9 +65,28 @@ export default async function SettingsPage() {
               </dd>
             </div>
           </dl>
-          <p className="mt-4 text-xs text-muted-foreground">
-            {t.editNote}
-          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{s.automation}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AutomationForm
+            quoteFollowUpDays={dbUser?.quoteFollowUpDays ?? 2}
+            reviewRequestDays={dbUser?.reviewRequestDays ?? 1}
+          />
+        </CardContent>
+      </Card>
+
+      <Card id="feedback">
+        <CardHeader>
+          <CardTitle>{t.feedback.sectionTitle}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t.feedback.sectionDesc}</p>
+        </CardHeader>
+        <CardContent>
+          <FeedbackForm />
         </CardContent>
       </Card>
     </div>

@@ -16,7 +16,13 @@ import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n/client";
 import { LanguageSwitcher } from "@/components/language-switcher";
 
-export function Sidebar() {
+export function Sidebar({
+  overdueCount = 0,
+  todayCount = 0,
+}: {
+  overdueCount?: number;
+  todayCount?: number;
+}) {
   const pathname = usePathname();
   const { t } = useTranslation();
 
@@ -29,6 +35,13 @@ export function Sidebar() {
     { href: "/billing", label: t.nav.billing, icon: CreditCard },
     { href: "/settings", label: t.nav.settings, icon: Settings },
   ];
+
+  const badge =
+    overdueCount > 0
+      ? { count: overdueCount, className: "bg-destructive text-destructive-foreground" }
+      : todayCount > 0
+        ? { count: todayCount, className: "bg-muted text-muted-foreground" }
+        : null;
 
   return (
     <aside className="hidden w-60 shrink-0 border-r bg-card md:block">
@@ -43,6 +56,7 @@ export function Sidebar() {
           const Icon = item.icon;
           const active =
             pathname === item.href || pathname.startsWith(item.href + "/");
+          const showBadge = item.href === "/followups" && badge;
           return (
             <Link
               key={item.href}
@@ -56,6 +70,16 @@ export function Sidebar() {
             >
               <Icon className="h-4 w-4" />
               {item.label}
+              {showBadge ? (
+                <span
+                  className={cn(
+                    "ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none",
+                    badge.className
+                  )}
+                >
+                  {badge.count > 99 ? "99+" : badge.count}
+                </span>
+              ) : null}
             </Link>
           );
         })}

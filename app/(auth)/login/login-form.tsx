@@ -54,9 +54,6 @@ export function LoginForm() {
       <Button type="submit" className="w-full" disabled={submitting}>
         {submitting ? t.auth.signingIn : t.auth.signIn}
       </Button>
-      <p className="text-center text-xs text-muted-foreground">
-        {t.auth.forgotPassword} <span className="underline">TODO</span>
-      </p>
     </form>
   );
 }

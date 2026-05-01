@@ -47,7 +47,7 @@ export function ContactForm({ mode, initial }: Props) {
     }
     toast.success(mode === "create" ? c.contactCreated : c.contactUpdated);
     const id = (res as { id?: string }).id ?? initial?.id;
-    router.push(`/contacts/${id}`);
+    router.push(mode === "create" ? `/contacts/${id}?new=1` : `/contacts/${id}`);
     router.refresh();
   }
 

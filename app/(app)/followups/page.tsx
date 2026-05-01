@@ -7,6 +7,9 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { FollowUpCard } from "@/components/followups/followup-card";
+import { SkipOverdueButton } from "@/components/followups/skip-overdue-button";
+import { MarkManualDoneButton } from "@/components/followups/mark-manual-done-button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Prisma } from "@prisma/client";
 
@@ -54,14 +57,42 @@ export default async function FollowUpsPage({
       break;
   }
 
-  const tasks = await prisma.followUpTask.findMany({
-    where,
-    include: {
-      contact: { select: { id: true, fullName: true, email: true } },
-      job: { select: { id: true, title: true } },
-    },
-    orderBy: { dueDate: filter === "done" ? "desc" : "asc" },
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { firstJobCreatedAt: true },
   });
+  const firstJobCreatedAt = dbUser?.firstJobCreatedAt ?? null;
+
+  const [tasks, overdueCount, manualTodayCount] = await Promise.all([
+    prisma.followUpTask.findMany({
+      where,
+      include: {
+        contact: { select: { id: true, fullName: true, email: true } },
+        job: { select: { id: true, title: true } },
+      },
+      orderBy: { dueDate: filter === "done" ? "desc" : "asc" },
+      take: 100,
+    }),
+    filter === "overdue"
+      ? prisma.followUpTask.count({
+          where: {
+            userId: user.id,
+            status: "PENDING",
+            dueDate: { lt: startOfDay(now) },
+          },
+        })
+      : Promise.resolve(0),
+    filter === "today"
+      ? prisma.followUpTask.count({
+          where: {
+            userId: user.id,
+            status: "PENDING",
+            channel: "MANUAL",
+            dueDate: { gte: startOfDay(now), lte: endOfDay(now) },
+          },
+        })
+      : Promise.resolve(0),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -89,20 +120,78 @@ export default async function FollowUpsPage({
 
       <Card>
         <CardContent className="space-y-3 pt-6">
+          {filter === "overdue" && overdueCount > 0 && (
+            <div className="mb-1">
+              <SkipOverdueButton count={overdueCount} />
+            </div>
+          )}
           {tasks.length === 0 ? (
-            <EmptyState
-              title={f.nothingTitle}
-              description={
-                filter === "today"
-                  ? f.todayEmpty
-                  : filter === "overdue"
-                    ? f.overdueEmpty
-                    : filter === "upcoming"
-                      ? f.upcomingEmpty
-                      : f.allEmpty
-              }
-            />
-          ) : (
+            filter === "all" ? (
+              firstJobCreatedAt === null ? (
+                <EmptyState
+                  title={f.nothingTitle}
+                  description={f.allNoJobsDesc}
+                  action={
+                    <Link href="/jobs" className={buttonVariants({ size: "sm" })}>
+                      {f.goToJobs}
+                    </Link>
+                  }
+                />
+              ) : (
+                <EmptyState
+                  title={f.nothingTitle}
+                  description={f.allDoneDesc}
+                />
+              )
+            ) : (
+              <EmptyState
+                title={f.nothingTitle}
+                description={
+                  filter === "today"
+                    ? f.todayEmpty
+                    : filter === "overdue"
+                      ? f.overdueEmpty
+                      : filter === "upcoming"
+                        ? f.upcomingEmpty
+                        : f.allEmpty
+                }
+              />
+            )
+          ) : (filter === "today" || filter === "overdue") ? (() => {
+            const emailTasks = tasks.filter((t) => t.channel === "EMAIL");
+            const manualTasks = tasks.filter((t) => t.channel !== "EMAIL");
+            const showHeaders = emailTasks.length > 0 && manualTasks.length > 0;
+
+            return (
+              <>
+                {emailTasks.length > 0 && (
+                  <>
+                    {showHeaders && (
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {f.groupEmail}
+                      </p>
+                    )}
+                    {emailTasks.map((t) => <FollowUpCard key={t.id} task={t} />)}
+                  </>
+                )}
+                {manualTasks.length > 0 && (
+                  <>
+                    {showHeaders && (
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {f.groupManual}
+                      </p>
+                    )}
+                    {filter === "today" && manualTodayCount > 0 && (
+                      <div>
+                        <MarkManualDoneButton count={manualTodayCount} />
+                      </div>
+                    )}
+                    {manualTasks.map((t) => <FollowUpCard key={t.id} task={t} />)}
+                  </>
+                )}
+              </>
+            );
+          })() : (
             tasks.map((t) => <FollowUpCard key={t.id} task={t} />)
           )}
         </CardContent>

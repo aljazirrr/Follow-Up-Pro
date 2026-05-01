@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
+import { log } from "@/lib/logger";
 import type { SubscriptionStatus, PlanType } from "@prisma/client";
 
 export const runtime = "nodejs";
@@ -82,7 +83,7 @@ async function syncSubscriptionByCustomer(sub: Stripe.Subscription) {
   console.log("[stripe webhook] existing row:", existing?.id ?? null);
 
   if (!existing) {
-    console.warn("[stripe webhook] No subscription row for customer", customerId);
+    log("stripe", "subscription_no_row", { customerId });
     return;
   }
 
@@ -104,6 +105,7 @@ async function syncSubscriptionByCustomer(sub: Stripe.Subscription) {
   });
 
   console.log("[stripe webhook] update success for row:", existing.id);
+  log("stripe", "subscription_updated", { customerId, subscriptionId: sub.id, status, plan });
 }
 
 export async function POST(req: NextRequest) {
@@ -198,6 +200,7 @@ export async function POST(req: NextRequest) {
         });
 
         console.log("[stripe webhook] delete sync success for customer:", customerId);
+        log("stripe", "subscription_canceled", { customerId, subscriptionId: sub.id });
         break;
       }
 
@@ -206,7 +209,7 @@ export async function POST(req: NextRequest) {
         break;
     }
   } catch (err) {
-    console.error("[stripe webhook] handler error", err);
+    log("stripe", "handler_error", { error: err instanceof Error ? err.message : String(err) });
     return NextResponse.json({ error: "handler error" }, { status: 500 });
   }
 
