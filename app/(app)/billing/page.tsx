@@ -2,12 +2,13 @@ import { CheckCircle2 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { getLocale, getDictionary } from "@/lib/i18n";
+import { STRIPE_CONFIGURED } from "@/lib/stripe";
+import { syncSubscriptionFromStripe } from "@/lib/subscription-sync";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UpgradeButton } from "./upgrade-button";
 import { ManageSubscriptionButton } from "./manage-button";
-import { STRIPE_CONFIGURED } from "@/lib/stripe";
 import { formatDate } from "@/lib/utils";
 
 export default async function BillingPage({
@@ -17,6 +18,14 @@ export default async function BillingPage({
 }) {
   const sp = await searchParams;
   const user = await requireUser();
+
+  // On return from Stripe checkout, proactively sync plan from Stripe.
+  // This makes the plan update reliable even if the webhook fired before
+  // the subscription row had a stripeCustomerId, or was simply delayed.
+  if (sp.status === "success") {
+    await syncSubscriptionFromStripe(user.id);
+  }
+
   const t = getDictionary(getLocale()).billing;
   const sub = await prisma.subscription.findUnique({ where: { userId: user.id } });
   const plan = sub?.plan ?? "FREE";
